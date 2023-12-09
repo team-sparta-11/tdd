@@ -11,6 +11,8 @@ jobs:
         with:
           node-version: 18
       - uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - if: ${{ startsWith(github.ref, 'refs/heads') && !startsWith(github.ref, 'refs/heads/main') }}
         run: |
@@ -30,6 +32,8 @@ jobs:
         with:
           node-version: 18
       - uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - if: ${{ startsWith(github.ref, 'refs/heads') && !startsWith(github.ref, 'refs/heads/main') }}
         run: |
