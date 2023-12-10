@@ -15,8 +15,7 @@ export default (app: INestApplication) => {
       .addBearerAuth() // bearer token
       .addSecurityRequirements('bearer')
       //
-      // .addServer(`http://localhost:${process.env['APP_PORT']}`)
-      .addServer(`http://localhost:3000`)
+      .addServer(`http://localhost:${process.env['APP_PORT']}`)
       .build();
 
     const customOptions: SwaggerCustomOptions = {
