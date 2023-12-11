@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8
+
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=1234
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app/
+
+volumes:
+  db_data:
