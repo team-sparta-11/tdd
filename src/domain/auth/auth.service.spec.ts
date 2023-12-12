@@ -13,7 +13,9 @@ describe('AuthService', () => {
         AuthService,
         { provide: 'UserRepository', useValue: createMock<Repository<User>>() },
       ],
-    }).compile();
+    })
+      .useMocker(createMock)
+      .compile();
 
     service = module.get<AuthService>(AuthService);
   });
