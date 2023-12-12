@@ -11,7 +11,7 @@ import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot(configModuleOption),
-    TmpApisModule,
+    // TmpApisModule, TODO: Reactivate after APIs done
     TypeOrmModule.forRootAsync(typeORMConfig),
     AuthModule,
   ],
