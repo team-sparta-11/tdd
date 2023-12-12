@@ -20,11 +20,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  async createUser(
+    authCredentialsDto: AuthCredentialsDto,
+  ): Promise<UserEntity> {
     const { email, password } = authCredentialsDto;
 
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.has(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = this.userRepository.create({
       email,
@@ -33,6 +35,7 @@ export class AuthService {
 
     try {
       await this.userRepository.save(user);
+      return user;
     } catch (error) {
       throw new InternalServerErrorException();
     }
