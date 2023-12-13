@@ -20,16 +20,14 @@ export class AuthService {
       password: hash,
       nickName: body.nickName,
     });
-    const { id, email, nickName } = await this.repository.save(user);
-    return { id, email, nickName };
+
+    return this.repository.insert(user);
   }
 
   async sign(body: AuthReqSignDto) {
     const user = await this.repository.findOneByOrFail({
       email: body.email,
     });
-
-    if (!user) throw new UnauthorizedException();
 
     if (!(await bcrypt.compare(body.password, user.password)))
       throw new UnauthorizedException();
