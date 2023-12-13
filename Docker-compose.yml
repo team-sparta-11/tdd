@@ -2,7 +2,7 @@ services:
   db:
     image: postgres
     ports:
-      - '5432:5432'
+      - '${DOCKER_DB_PORT}:5432'
     volumes:
       - db_data:/var/lib/postgresql/data
     environment:
@@ -24,7 +24,7 @@ services:
     depends_on:
       - db
     ports:
-      - "3000:3000"
+      - "${DOCKER_APP_PORT}:3000"
     volumes:
       - ./:/app/
 
