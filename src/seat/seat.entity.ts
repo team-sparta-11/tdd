@@ -15,6 +15,9 @@ export class SeatEntity extends BaseEntity {
   @ManyToOne(() => DateEntity, (date) => date.seatAvailability)
   dateAvailability: DateEntity;
 
+  @Column({ nullable: true })
+  userId: number;
+
   @Column()
   seatNumber: number;
 

@@ -8,6 +8,7 @@ import { typeORMConfig } from './config/typeorm.config';
 import { AuthModule } from './auth/auth.module';
 import { PaymentModule } from './payment/payment.module';
 import { SeatModule } from './seat/seat.module';
+import { ReservationModule } from './reservation/reservation.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SeatModule } from './seat/seat.module';
     AuthModule,
     PaymentModule,
     SeatModule,
+    ReservationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
