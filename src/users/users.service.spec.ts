@@ -82,15 +82,4 @@ describe('UsersService', () => {
       ).rejects.toThrow(new NotFoundException('user not found'));
     });
   });
-
-  describe('verifyAccessToken', () => {
-    it('is verified if access token and payload is same when compared', async () => {
-      const accessToken = 'jZAgcfl7p92ldGxad68LJZdL17lhWy';
-      const payload = {};
-
-      await usersService.verifyAccessToken(accessToken, payload);
-    });
-
-    it('is not verified if access token and payload are different when compared', () => {});
-  });
 });

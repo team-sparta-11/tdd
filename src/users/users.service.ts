@@ -38,14 +38,4 @@ export class UsersService {
 
     return accessToken;
   }
-
-  async verifyAccessToken(
-    accessToken: string,
-    payload: Record<string, unknown>,
-  ) {
-    const payloadJson = JSON.stringify(payload);
-    const isVerified = await bcrypt.compare(accessToken, payloadJson);
-
-    return isVerified;
-  }
 }
