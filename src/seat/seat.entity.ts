@@ -5,7 +5,7 @@ import {
   ManyToOne,
   BaseEntity,
 } from 'typeorm';
-import { DateEntity } from './date.entity'; // DateAvailability Entity 모델 import
+import { DateEntity } from './date.entity';
 
 @Entity()
 export class SeatEntity extends BaseEntity {
