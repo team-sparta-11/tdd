@@ -1,3 +1,4 @@
+import { PAYMENT_STATUS } from 'src/types/reservation';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -15,8 +16,8 @@ export class PaymentEntity extends BaseEntity {
   paymentDate: string;
 
   @Column()
-  status: string;
+  status: PAYMENT_STATUS;
 
   @Column()
-  seatReservationId: number;
+  reservationId: number;
 }

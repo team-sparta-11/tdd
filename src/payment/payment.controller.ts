@@ -25,7 +25,15 @@ export class PaymentController {
   chargeBalance(
     @GetUser() user: UserEntity,
     @Body('amount', ParseIntPipe) amount: number,
-  ): number {
+  ): Promise<number> {
     return this.paymentService.chargeBalance({ user, amount });
+  }
+
+  @Post('/reservation')
+  payReservation(
+    @GetUser() user: UserEntity,
+    @Body('reservationId', ParseIntPipe) reservationId: number,
+  ) {
+    return this.paymentService.payReservation({ user, reservationId });
   }
 }
