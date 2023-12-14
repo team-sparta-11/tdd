@@ -37,7 +37,7 @@ export class AuthService {
       await this.userRepository.save(user);
       return user;
     } catch (error) {
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException('Sign up failed');
     }
   }
 

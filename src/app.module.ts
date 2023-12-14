@@ -7,6 +7,7 @@ import { TmpApisModule } from './tmp-apis/tmp-apis.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './config/typeorm.config';
 import { AuthModule } from './auth/auth.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     // TmpApisModule, TODO: Reactivate after APIs done
     TypeOrmModule.forRootAsync(typeORMConfig),
     AuthModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
