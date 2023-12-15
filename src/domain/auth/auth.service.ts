@@ -14,14 +14,7 @@ export class AuthService {
   ) {}
 
   async register(body: User) {
-    const hash = await bcrypt.hash(body.password, 10);
-    const user = this.repository.create({
-      email: body.email,
-      password: hash,
-      nickName: body.nickName,
-    });
-
-    return this.repository.insert(user);
+    return this.repository.insert(this.repository.create(body));
   }
 
   async sign(body: AuthReqSignDto) {
