@@ -9,10 +9,12 @@ import { PaymentModule } from './payment/payment.module';
 import { SeatModule } from './seat/seat.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { WaitingModule } from './waiting/waiting.module';
+import { RedisClientModule } from './common/redis/redis.client-module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(configModuleOption),
+    RedisClientModule,
     TypeOrmModule.forRootAsync(typeORMConfig),
     AuthModule,
     PaymentModule,
