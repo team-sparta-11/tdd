@@ -1,8 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
-import { createMock } from '@golevelup/ts-jest';
-import { Repository } from 'typeorm';
-import { User } from './struct/user.entity';
+import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -10,12 +8,10 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AuthService,
-        { provide: 'UserRepository', useValue: createMock<Repository<User>>() },
+        { provide: AuthService, useValue: jest.fn() },
+        { provide: JwtService, useValue: jest.fn() },
       ],
-    })
-      .useMocker(createMock)
-      .compile();
+    }).compile();
 
     service = module.get<AuthService>(AuthService);
   });
