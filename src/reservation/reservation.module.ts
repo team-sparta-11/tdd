@@ -4,7 +4,7 @@ import { ReservationService } from './reservation.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { jwtConfig } from 'src/config/jwt.config';
+import { jwtConfig } from 'src/common/config/jwt.config';
 import { ReservationEntity } from './reservation.entity';
 import { SeatEntity } from 'src/seat/seat.entity';
 import { SeatService } from 'src/seat/seat.service';
