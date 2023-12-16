@@ -4,6 +4,6 @@ import { WaitingService } from './waiting.service';
 
 @Module({
   controllers: [WaitingController],
-  providers: [WaitingService]
+  providers: [WaitingService],
 })
 export class WaitingModule {}
