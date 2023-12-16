@@ -9,10 +9,12 @@ import { PaymentModule } from './payment/payment.module';
 import { SeatModule } from './seat/seat.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { WaitingModule } from './waiting/waiting.module';
+import { ProxyModule } from './common/proxy/proxy.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(configModuleOption),
+    ProxyModule,
     TypeOrmModule.forRootAsync(typeORMConfig),
     AuthModule,
     PaymentModule,
