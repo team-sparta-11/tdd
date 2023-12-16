@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { PaymentModule } from './payment/payment.module';
 import { SeatModule } from './seat/seat.module';
 import { ReservationModule } from './reservation/reservation.module';
+import { WaitingModule } from './waiting/waiting.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ReservationModule } from './reservation/reservation.module';
     PaymentModule,
     SeatModule,
     ReservationModule,
+    WaitingModule,
   ],
   providers: [AppService],
 })
