@@ -15,6 +15,12 @@ export default (app: INestApplication) => {
       .addBearerAuth() // bearer token
       .addSecurityRequirements('bearer')
       //
+      .addSecurity('status-token', {
+        type: 'apiKey',
+        in: 'header',
+        name: 'status-token',
+      })
+      .addSecurityRequirements('status-token')
       .addServer(`http://localhost:${process.env['APP_PORT']}`)
       .build();
 

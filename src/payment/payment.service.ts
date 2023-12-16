@@ -1,9 +1,9 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../auth/user.entity';
+import { UserEntity } from '../auth/struct/user.entity';
 import { Repository } from 'typeorm';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
-import { PAYMENT_STATUS } from 'src/types/reservation';
+import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { PaymentEntity } from './payment.entity';
 
 const PRICE = 10000;
