@@ -17,7 +17,7 @@ async function bootstrap() {
   app.connectMicroservice<MicroserviceOptions>(proxyConfig['proxyOptions']);
   await app.startAllMicroservices();
 
-  await app.listen(appConfig['port']);
+  await app.listen(appConfig['port'], '0.0.0.0');
 
   return appConfig;
 }
