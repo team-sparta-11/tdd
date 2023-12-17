@@ -5,14 +5,16 @@ import { Repository } from 'typeorm';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { PAYMENT_STATUS } from 'src/types/reservation';
 import { PaymentEntity } from './payment.entity';
+import { UserManager, UserReader } from 'src/auth/user.repository';
 
 const PRICE = 10000;
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    private readonly userReader: UserReader,
+    private readonly userManager: UserManager,
+
     @InjectRepository(ReservationEntity)
     private reservationRepository: Repository<ReservationEntity>,
     @InjectRepository(PaymentEntity)
@@ -29,7 +31,7 @@ export class PaymentService {
       balance: newBalance,
     };
 
-    await this.userRepository.save(newUser);
+    await this.userManager.save(newUser);
 
     return newBalance;
   }
@@ -56,7 +58,7 @@ export class PaymentService {
       paymentStatus: PAYMENT_STATUS.PAID,
     });
 
-    await this.userRepository.save({ ...user, balance: user.balance - PRICE });
+    await this.userManager.save({ ...user, balance: user.balance - PRICE });
 
     const payment = this.paymentRepository.create({
       userId: user.id,
