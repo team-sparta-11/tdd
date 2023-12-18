@@ -3,38 +3,36 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { AuthCredentialsDto } from './struct/auth-credential.dto';
-import { UserEntity } from './struct/user.entity';
+
+import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from 'src/common/types/auth';
+import { JwtPayload } from 'src/types/auth';
+import { UserManager, UserReader } from './user.handler';
+import { User } from './user.domain';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    private readonly userReader: UserReader,
+    private readonly userManager: UserManager,
+
     private jwtService: JwtService,
   ) {}
 
-  async createUser(
-    authCredentialsDto: AuthCredentialsDto,
-  ): Promise<UserEntity> {
+  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<User> {
     const { email, password } = authCredentialsDto;
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = this.userRepository.create({
+    const user = this.userManager.create({
       email,
       password: hashedPassword,
     });
 
     try {
-      await this.userRepository.save(user);
-      return user;
+      return await this.userManager.save(user);
     } catch (error) {
       throw new InternalServerErrorException('Sign up failed');
     }
@@ -45,7 +43,7 @@ export class AuthService {
   ): Promise<{ accessToken: string }> {
     const { email, password } = authCredentialsDto;
 
-    const user = await this.userRepository.findOneBy({ email });
+    const user = await this.userReader.findOneByEmail(email);
 
     if (user && (await bcrypt.compare(password, user.password))) {
       const payload: JwtPayload = {
