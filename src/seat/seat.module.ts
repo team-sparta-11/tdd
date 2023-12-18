@@ -6,7 +6,7 @@ import { SeatEntity } from './seat.entity';
 import { PassportModule } from '@nestjs/passport';
 import { DateEntity } from './date.entity';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConfig } from 'src/config/jwt.config';
+import { jwtConfig } from 'src/common/config/jwt.config';
 
 @Module({
   imports: [

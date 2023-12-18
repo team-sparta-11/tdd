@@ -9,7 +9,7 @@ import {
 import { PaymentService } from './payment.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.decorator';
-import { UserEntity } from 'src/auth/user.entity';
+import { UserEntity } from 'src/auth/struct/user.entity';
 
 @Controller('payment')
 @UseGuards(AuthGuard('jwt'))
