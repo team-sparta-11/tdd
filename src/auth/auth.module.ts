@@ -9,7 +9,6 @@ import { AuthService } from './auth.service';
 import { UserEntity } from './user.entity';
 import { jwtConfig } from 'src/config/jwt.config';
 import { JwtStrategy } from './jwt.strategy';
-import { UserManager, UserReader } from './user.handler';
 
 @Module({
   imports: [
@@ -18,7 +17,7 @@ import { UserManager, UserReader } from './user.handler';
     TypeOrmModule.forFeature([UserEntity]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, ConfigService, UserReader, UserManager],
+  providers: [AuthService, JwtStrategy, ConfigService],
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
