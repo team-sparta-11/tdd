@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { PAYMENT_STATUS } from 'src/types/reservation';
 import { PaymentEntity } from './payment.entity';
-import { UserManager, UserReader } from 'src/auth/user.repository';
+import { UserManager, UserReader } from 'src/auth/user.handler';
 
 const PRICE = 10000;
 

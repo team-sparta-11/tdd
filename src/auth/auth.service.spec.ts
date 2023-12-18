@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserManager, UserReader } from './user.repository';
+import { UserManager, UserReader } from './user.handler';
 import { Repository } from 'typeorm';
 import { User } from './user.domain';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';

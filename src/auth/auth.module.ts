@@ -9,7 +9,7 @@ import { AuthService } from './auth.service';
 import { UserEntity } from './user.entity';
 import { jwtConfig } from 'src/config/jwt.config';
 import { JwtStrategy } from './jwt.strategy';
-import { UserManager, UserReader } from './user.repository';
+import { UserManager, UserReader } from './user.handler';
 
 @Module({
   imports: [

@@ -11,7 +11,7 @@ import { UserEntity } from 'src/auth/user.entity';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { SeatEntity } from 'src/seat/seat.entity';
-import { UserManager, UserReader } from 'src/auth/user.repository';
+import { UserManager, UserReader } from 'src/auth/user.handler';
 
 @Module({
   imports: [
