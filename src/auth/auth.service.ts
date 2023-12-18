@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { AuthCredentialsDto } from './dto/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/types/auth';
-import { UserManager, UserReader } from './user.repository';
+import { UserManager, UserReader } from './user.handler';
 import { User } from './user.domain';
 
 @Injectable()
