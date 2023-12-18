@@ -11,6 +11,7 @@ import { UserEntity } from 'src/auth/struct/user.entity';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { SeatEntity } from 'src/seat/seat.entity';
+import { UserManager, UserReader } from '../auth/user.handler';
 
 @Module({
   imports: [
@@ -23,7 +24,13 @@ import { SeatEntity } from 'src/seat/seat.entity';
       SeatEntity,
     ]),
   ],
-  providers: [PaymentService, AuthService, ReservationService],
+  providers: [
+    PaymentService,
+    AuthService,
+    ReservationService,
+    UserReader,
+    UserManager,
+  ],
   controllers: [PaymentController],
 })
 export class PaymentModule {}
