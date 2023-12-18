@@ -1,4 +1,4 @@
-import { PAYMENT_STATUS } from 'src/types/reservation';
+import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from 'typeorm';
 
 @Entity()

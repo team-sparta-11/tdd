@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { ReservationEntity } from './reservation.entity';
 import { Repository } from 'typeorm';
-import { PAYMENT_STATUS } from 'src/types/reservation';
+import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { SeatEntity } from 'src/seat/seat.entity';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
