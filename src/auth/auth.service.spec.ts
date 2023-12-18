@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserManager, UserReader } from './user.handler';
 import { Repository } from 'typeorm';
-import { User } from './user.domain';
+import { User } from './struct/user.domain';
 import { AuthCredentialsDto } from './struct/auth-credential.dto';
 import { UserEntity } from './user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
