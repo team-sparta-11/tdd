@@ -1,20 +1,22 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../auth/struct/user.entity';
 import { Repository } from 'typeorm';
-import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { PaymentEntity } from './payment.entity';
+import {
+  ReservationManager,
+  ReservationReader,
+} from 'src/reservation/reservation.handler';
+import { UserManager } from 'src/auth/user.handler';
 
 const PRICE = 10000;
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
-    @InjectRepository(ReservationEntity)
-    private reservationRepository: Repository<ReservationEntity>,
+    private userManager: UserManager,
+    private reservationManager: ReservationManager,
+    private reservationReader: ReservationReader,
     @InjectRepository(PaymentEntity)
     private paymentRepository: Repository<PaymentEntity>,
   ) {}
@@ -29,7 +31,7 @@ export class PaymentService {
       balance: newBalance,
     };
 
-    await this.userRepository.save(newUser);
+    await this.userManager.save(newUser);
 
     return newBalance;
   }
@@ -39,8 +41,8 @@ export class PaymentService {
       throw new InternalServerErrorException('Balance is not enough to pay');
     }
 
-    const reservation = await this.reservationRepository.findOne({
-      where: { id: reservationId },
+    const reservation = await this.reservationReader.findOne({
+      id: reservationId,
     });
 
     if (!reservation) {
@@ -51,12 +53,12 @@ export class PaymentService {
       throw new InternalServerErrorException('Reservation is expired');
     }
 
-    await this.reservationRepository.save({
+    await this.reservationManager.save({
       ...reservation,
       paymentStatus: PAYMENT_STATUS.PAID,
     });
 
-    await this.userRepository.save({ ...user, balance: user.balance - PRICE });
+    await this.userManager.save({ ...user, balance: user.balance - PRICE });
 
     const payment = this.paymentRepository.create({
       userId: user.id,

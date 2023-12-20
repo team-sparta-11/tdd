@@ -24,13 +24,8 @@ export class ReservationManager implements Command<Reservation> {
   }
 }
 
-type TFindReservationParam = Pick<
-  Reservation,
-  'userId' | 'seatNumber' | 'date'
->;
-
 interface Query<T> {
-  findOne(reservation: TFindReservationParam): Promise<T | undefined>;
+  findOne(reservation: DeepPartial<Reservation>): Promise<T | undefined>;
 }
 
 export class ReservationReader implements Query<Reservation> {
@@ -40,7 +35,7 @@ export class ReservationReader implements Query<Reservation> {
   ) {}
 
   async findOne(
-    reservation: TFindReservationParam,
+    reservation: DeepPartial<Reservation>,
   ): Promise<Reservation | undefined> {
     return this.reservationRepository.findOne({ where: reservation });
   }
