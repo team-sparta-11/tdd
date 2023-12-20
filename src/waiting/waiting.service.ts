@@ -1,27 +1,42 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { WaitingUtil } from './waiting.util';
 import { WaitingScheduleService } from './waiting.schedule.service';
-import { WaitingManager, WaitingReader } from './waiting.handler';
+import { ICmdManager, IQueryManager } from '../common/cqrs/icqrs.interface';
+import { WaitingToken } from '../common/types/waiting';
+import { Command, Query } from './waiting.handler';
+// import { Command, Query } from './waiting.handler';
 
 @Injectable()
 export class WaitingService {
   constructor(
     private readonly util: WaitingUtil,
-    private readonly manager: WaitingManager,
-    private readonly reader: WaitingReader,
+    @Inject('ICmdManager') private readonly commandManager: ICmdManager,
+    @Inject('IQueryManager') private readonly queryManager: IQueryManager,
     private readonly schedule: WaitingScheduleService,
   ) {}
   async work(headerStatusToken?: string) {
     const statusToken =
       headerStatusToken ?? (await this.util.generateStatusToken());
 
-    const taskToken = await this.reader.isInTask(statusToken);
+    // const taskToken = await this.reader.isInTask(statusToken);
+    // if (taskToken.inTask) return taskToken;
+    //
+    // const waitingToken = await this.reader.isInWaiting(statusToken);
+    // if (waitingToken) return waitingToken;
+    //
+    // return this.manager.lpush(statusToken);
+
+    const taskToken = await this.queryManager.execute<WaitingToken>(
+      new Query('isInTask', statusToken),
+    );
     if (taskToken.inTask) return taskToken;
 
-    const waitingToken = await this.reader.isInWaiting(statusToken);
+    const waitingToken = await this.queryManager.execute(
+      new Query('isInWaiting', statusToken),
+    );
     if (waitingToken) return waitingToken;
 
-    return this.manager.lpush(statusToken);
+    return this.commandManager.execute(new Command('lpush', statusToken));
   }
 
   async forceMoveTask() {
