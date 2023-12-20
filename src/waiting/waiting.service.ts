@@ -4,7 +4,6 @@ import { WaitingScheduleService } from './waiting.schedule.service';
 import { ICmdManager, IQueryManager } from '../common/cqrs/icqrs.interface';
 import { WaitingToken } from '../common/types/waiting';
 import { Command, Query } from './waiting.handler';
-// import { Command, Query } from './waiting.handler';
 
 @Injectable()
 export class WaitingService {
@@ -17,14 +16,6 @@ export class WaitingService {
   async work(headerStatusToken?: string) {
     const statusToken =
       headerStatusToken ?? (await this.util.generateStatusToken());
-
-    // const taskToken = await this.reader.isInTask(statusToken);
-    // if (taskToken.inTask) return taskToken;
-    //
-    // const waitingToken = await this.reader.isInWaiting(statusToken);
-    // if (waitingToken) return waitingToken;
-    //
-    // return this.manager.lpush(statusToken);
 
     const taskToken = await this.queryManager.execute<WaitingToken>(
       new Query('isInTask', statusToken),
