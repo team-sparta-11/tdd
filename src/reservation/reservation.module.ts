@@ -9,6 +9,7 @@ import { ReservationEntity } from './reservation.entity';
 import { SeatEntity } from 'src/seat/seat.entity';
 import { SeatService } from 'src/seat/seat.service';
 import { DateEntity } from 'src/seat/date.entity';
+import { ReservationManager, ReservationReader } from './reservation.handler';
 
 @Module({
   imports: [
@@ -16,8 +17,12 @@ import { DateEntity } from 'src/seat/date.entity';
     JwtModule.registerAsync(jwtConfig),
     TypeOrmModule.forFeature([ReservationEntity, SeatEntity, DateEntity]),
   ],
-
   controllers: [ReservationController],
-  providers: [ReservationService, SeatService],
+  providers: [
+    ReservationService,
+    SeatService,
+    ReservationManager,
+    ReservationReader,
+  ],
 })
 export class ReservationModule {}

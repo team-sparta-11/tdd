@@ -10,7 +10,7 @@ import { ReservationService } from './reservation.service';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { UserEntity } from 'src/auth/struct/user.entity';
 import { RequestReservationDto } from './dto/request-reservation.dto';
-import { ReservationEntity } from './reservation.entity';
+import { Reservation } from './reservation.domain';
 
 @Controller('reservation')
 @UseGuards(AuthGuard('jwt'))
@@ -21,7 +21,7 @@ export class ReservationController {
   requestReservation(
     @Body(ValidationPipe) requestReservationDto: RequestReservationDto,
     @GetUser() user: UserEntity,
-  ): Promise<ReservationEntity> {
+  ): Promise<Reservation> {
     return this.reservationService.requestReservation({
       requestReservationDto,
       user,

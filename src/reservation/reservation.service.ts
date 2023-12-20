@@ -4,18 +4,20 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ReservationEntity } from './reservation.entity';
 import { Repository } from 'typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { SeatEntity } from 'src/seat/seat.entity';
+import { ReservationManager, ReservationReader } from './reservation.handler';
+import { Reservation } from './reservation.domain';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
 @Injectable()
 export class ReservationService {
   constructor(
-    @InjectRepository(ReservationEntity)
-    private reservationRepository: Repository<ReservationEntity>,
+    private readonly reservationManager: ReservationManager,
+    private readonly reservationReader: ReservationReader,
+
     @InjectRepository(SeatEntity)
     private seatRepository: Repository<SeatEntity>,
   ) {}
@@ -23,7 +25,7 @@ export class ReservationService {
   async requestReservation({
     requestReservationDto,
     user,
-  }): Promise<ReservationEntity> {
+  }): Promise<Reservation> {
     const { seatNumber, date } = requestReservationDto;
     const { id: userId } = user;
 
@@ -39,7 +41,7 @@ export class ReservationService {
 
     await this.seatRepository.save({ ...seat, userId, isAvailable: false });
 
-    const reservation = this.reservationRepository.create({
+    const reservation = this.reservationManager.create({
       userId,
       seatNumber,
       date,
@@ -47,11 +49,13 @@ export class ReservationService {
       isExpired: false,
     });
 
-    await this.reservationRepository.save(reservation);
+    await this.reservationManager.save(reservation);
 
     setTimeout(async () => {
-      const afterReservation = await this.reservationRepository.findOne({
-        where: { userId, seatNumber, date },
+      const afterReservation = await this.reservationReader.findOne({
+        userId,
+        seatNumber,
+        date,
       });
 
       if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
@@ -62,7 +66,7 @@ export class ReservationService {
         });
       }
 
-      await this.reservationRepository.save({
+      await this.reservationManager.save({
         ...reservation,
         isExpired: true,
       });
