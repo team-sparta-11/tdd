@@ -1,13 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
-import { PaymentEntity } from './payment.entity';
 import {
   ReservationManager,
   ReservationReader,
 } from 'src/reservation/reservation.handler';
 import { UserManager } from 'src/auth/user.handler';
+import { PaymentnManager } from './payment.handler';
 
 const PRICE = 10000;
 
@@ -17,8 +15,7 @@ export class PaymentService {
     private userManager: UserManager,
     private reservationManager: ReservationManager,
     private reservationReader: ReservationReader,
-    @InjectRepository(PaymentEntity)
-    private paymentRepository: Repository<PaymentEntity>,
+    private paymentManager: PaymentnManager,
   ) {}
 
   async chargeBalance({ user, amount }) {
@@ -60,7 +57,7 @@ export class PaymentService {
 
     await this.userManager.save({ ...user, balance: user.balance - PRICE });
 
-    const payment = this.paymentRepository.create({
+    const payment = this.paymentManager.create({
       userId: user.id,
       amount: PRICE,
       paymentDate: new Date().toISOString(),
@@ -68,7 +65,7 @@ export class PaymentService {
       reservationId,
     });
 
-    await this.paymentRepository.save(payment);
+    await this.paymentManager.save(payment);
 
     return 'Reservation is done';
   }
