@@ -1,6 +1,6 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './user.domain';
-import { UserEntity } from './user.entity';
+import { User } from './struct/user.domain';
+import { UserEntity } from './struct/user.entity';
 import { DeepPartial, Repository } from 'typeorm';
 
 interface Command<T> {

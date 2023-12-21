@@ -9,7 +9,7 @@ import { AuthCredentialsDto } from './struct/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload } from 'src/types/auth';
 import { UserManager, UserReader } from './user.handler';
-import { User } from './user.domain';
+import { User } from './struct/user.domain';
 
 @Injectable()
 export class AuthService {
@@ -46,13 +46,9 @@ export class AuthService {
     const user = await this.userReader.findOneByEmail(email);
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const payload: JwtPayload = {
-        email,
-        // queueInfo
-      };
-      const accessToken = await this.jwtService.sign(payload);
+      const payload: JwtPayload = { email };
 
-      return { accessToken };
+      return { accessToken: this.jwtService.sign(payload) };
     } else {
       throw new UnauthorizedException('Login failed');
     }
