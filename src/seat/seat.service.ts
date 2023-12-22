@@ -14,28 +14,35 @@ export class SeatService {
   ) {}
 
   async getAvailableDates(): Promise<string[]> {
-    const dates = await this.dateRepository
-      .createQueryBuilder('date')
-      .select('date.date')
-      .innerJoin('date.seatAvailability', 'seat')
-      .where('seat.isAvailable = true')
-      .distinct(true)
-      .orderBy('date.date', 'ASC')
-      .getRawMany();
+    const availableDates = await this.dateRepository.find({
+      relations: ['seatAvailability'],
+      where: {
+        seatAvailability: {
+          isAvailable: true,
+        },
+      },
+      order: {
+        date: 'ASC',
+      },
+    });
 
-    return dates.map((v) => v.date_date);
+    return availableDates.map((date) => date.date);
   }
 
   async getAvailableSeatsByDate(date: string): Promise<number[]> {
-    const seats = await this.seatRepository
-      .createQueryBuilder('seat')
-      .select('seat.seatNumber')
-      .innerJoin('seat.dateAvailability', 'date')
-      .where('date.date = :date', { date })
-      .andWhere('seat.isAvailable = true')
-      .orderBy('seat.seatNumber', 'ASC')
-      .getRawMany();
+    const availableSeats = await this.seatRepository.find({
+      relations: ['dateAvailability'],
+      where: {
+        dateAvailability: {
+          date,
+        },
+        isAvailable: true,
+      },
+      order: {
+        seatNumber: 'ASC',
+      },
+    });
 
-    return seats.map((seat) => seat.seat_seatNumber);
+    return availableSeats.map((seat) => seat.seatNumber);
   }
 }
