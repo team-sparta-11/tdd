@@ -12,17 +12,19 @@ import { WaitingModule } from './waiting/waiting.module';
 import { RedisClientModule } from './common/redis/redis.client-module';
 import { APP_GUARD } from '@nestjs/core';
 import { InTaskGuard } from './common/guard/InTask.guard';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot(configModuleOption),
     RedisClientModule,
     TypeOrmModule.forRootAsync(typeORMConfig),
+    ScheduleModule.forRoot(),
+    WaitingModule,
     AuthModule,
     PaymentModule,
     SeatModule,
     ReservationModule,
-    WaitingModule,
   ],
   providers: [
     AppService,

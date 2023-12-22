@@ -7,7 +7,7 @@ import * as bcrypt from 'bcrypt';
 
 import { AuthCredentialsDto } from './struct/auth-credential.dto';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload } from 'src/types/auth';
+import { JwtPayload } from 'src/common/types/auth';
 import { UserManager, UserReader } from './user.handler';
 import { User } from './struct/user.domain';
 

@@ -1,5 +1,5 @@
 import { RedisClientService } from '../common/redis/redis.client-service';
-import { WaitingToken } from '../types/waiting';
+import { WaitingToken } from '../common/types/waiting';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 

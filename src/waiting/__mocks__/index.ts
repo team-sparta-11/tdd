@@ -1,4 +1,4 @@
-import { WaitingToken } from '../../types/waiting';
+import { WaitingToken } from '../../common/types/waiting';
 
 export const WaitingNotInTaskMock: WaitingToken = {
   rank: 1,
