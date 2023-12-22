@@ -17,6 +17,10 @@ export class SeatService {
     const dates = await this.dateRepository
       .createQueryBuilder('date')
       .select('date.date')
+      .innerJoin('date.seatAvailability', 'seat')
+      .where('seat.isAvailable = true')
+      .distinct(true)
+      .orderBy('date.date', 'ASC')
       .getRawMany();
 
     return dates.map((v) => v.date_date);
@@ -29,6 +33,7 @@ export class SeatService {
       .innerJoin('seat.dateAvailability', 'date')
       .where('date.date = :date', { date })
       .andWhere('seat.isAvailable = true')
+      .orderBy('seat.seatNumber', 'ASC')
       .getRawMany();
 
     return seats.map((seat) => seat.seat_seatNumber);
