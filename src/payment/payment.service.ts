@@ -7,7 +7,7 @@ import {
 import { UserManager } from 'src/auth/user.handler';
 import { PaymentnManager } from './payment.handler';
 
-const PRICE = 10000;
+export const PRICE = 10000;
 
 @Injectable()
 export class PaymentService {
@@ -50,10 +50,12 @@ export class PaymentService {
       throw new InternalServerErrorException('Reservation is expired');
     }
 
-    await this.reservationManager.save({
+    const updatedReservation = {
       ...reservation,
       paymentStatus: PAYMENT_STATUS.PAID,
-    });
+    };
+
+    await this.reservationManager.save(updatedReservation);
 
     await this.userManager.save({ ...user, balance: user.balance - PRICE });
 
@@ -67,6 +69,6 @@ export class PaymentService {
 
     await this.paymentManager.save(payment);
 
-    return 'Reservation is done';
+    return updatedReservation;
   }
 }
