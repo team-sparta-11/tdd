@@ -1,12 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DateService } from './date.service';
+import { DateReader } from './date.handler';
 
 describe('DateService', () => {
   let service: DateService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [DateService],
+      providers: [
+        { provide: DateService, useValue: jest.fn() },
+        { provide: DateReader, useValue: jest.fn() },
+      ],
     }).compile();
 
     service = module.get<DateService>(DateService);
