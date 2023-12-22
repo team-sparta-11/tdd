@@ -7,13 +7,13 @@ export class ReservationEntity extends BaseEntity {
   id: number;
 
   @Column()
-  userId: string;
+  userId: number;
 
   @Column()
   date: string;
 
   @Column()
-  seatNumber: string;
+  seatNumber: number;
 
   @Column()
   isExpired: boolean;

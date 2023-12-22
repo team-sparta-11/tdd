@@ -1,22 +1,21 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../auth/struct/user.entity';
-import { Repository } from 'typeorm';
-import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
-import { PaymentEntity } from './payment.entity';
+import {
+  ReservationManager,
+  ReservationReader,
+} from 'src/reservation/reservation.handler';
+import { UserManager } from 'src/auth/user.handler';
+import { PaymentnManager } from './payment.handler';
 
-const PRICE = 10000;
+export const PRICE = 10000;
 
 @Injectable()
 export class PaymentService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
-    @InjectRepository(ReservationEntity)
-    private reservationRepository: Repository<ReservationEntity>,
-    @InjectRepository(PaymentEntity)
-    private paymentRepository: Repository<PaymentEntity>,
+    private userManager: UserManager,
+    private reservationManager: ReservationManager,
+    private reservationReader: ReservationReader,
+    private paymentManager: PaymentnManager,
   ) {}
 
   async chargeBalance({ user, amount }) {
@@ -29,7 +28,7 @@ export class PaymentService {
       balance: newBalance,
     };
 
-    await this.userRepository.save(newUser);
+    await this.userManager.save(newUser);
 
     return newBalance;
   }
@@ -39,8 +38,8 @@ export class PaymentService {
       throw new InternalServerErrorException('Balance is not enough to pay');
     }
 
-    const reservation = await this.reservationRepository.findOne({
-      where: { id: reservationId },
+    const reservation = await this.reservationReader.findOne({
+      id: reservationId,
     });
 
     if (!reservation) {
@@ -51,14 +50,16 @@ export class PaymentService {
       throw new InternalServerErrorException('Reservation is expired');
     }
 
-    await this.reservationRepository.save({
+    const updatedReservation = {
       ...reservation,
       paymentStatus: PAYMENT_STATUS.PAID,
-    });
+    };
 
-    await this.userRepository.save({ ...user, balance: user.balance - PRICE });
+    await this.reservationManager.save(updatedReservation);
 
-    const payment = this.paymentRepository.create({
+    await this.userManager.save({ ...user, balance: user.balance - PRICE });
+
+    const payment = this.paymentManager.create({
       userId: user.id,
       amount: PRICE,
       paymentDate: new Date().toISOString(),
@@ -66,8 +67,8 @@ export class PaymentService {
       reservationId,
     });
 
-    await this.paymentRepository.save(payment);
+    await this.paymentManager.save(payment);
 
-    return 'Reservation is done';
+    return updatedReservation;
   }
 }

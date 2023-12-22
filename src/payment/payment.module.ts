@@ -12,6 +12,11 @@ import { ReservationEntity } from 'src/reservation/reservation.entity';
 import { ReservationService } from 'src/reservation/reservation.service';
 import { SeatEntity } from 'src/seat/seat.entity';
 import { UserManager, UserReader } from '../auth/user.handler';
+import {
+  ReservationManager,
+  ReservationReader,
+} from 'src/reservation/reservation.handler';
+import { PaymentnManager } from './payment.handler';
 
 @Module({
   imports: [
@@ -30,6 +35,9 @@ import { UserManager, UserReader } from '../auth/user.handler';
     ReservationService,
     UserReader,
     UserManager,
+    ReservationManager,
+    ReservationReader,
+    PaymentnManager,
   ],
   controllers: [PaymentController],
 })
