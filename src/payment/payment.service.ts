@@ -69,6 +69,6 @@ export class PaymentService {
 
     await this.paymentManager.save(payment);
 
-    return updatedReservation;
+    return payment;
   }
 }
