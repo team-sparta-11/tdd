@@ -5,3 +5,9 @@ export const WaitingNotInTaskMock: WaitingToken = {
   token: 'someTokenMadeByUtil',
   inTask: false,
 };
+
+export const InTaskMock: WaitingToken = {
+  rank: 0,
+  token: 'someTokenMadeByUtil',
+  inTask: true,
+};

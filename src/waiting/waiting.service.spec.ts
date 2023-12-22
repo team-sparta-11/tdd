@@ -45,4 +45,46 @@ describe('WaitingService', () => {
     expect(reader.isInWaiting).toHaveBeenCalled();
     expect(manager.lpush).toHaveBeenCalled();
   });
+
+  it('when in waiting, not in task, skip new generate wait token', async () => {
+    jest
+      .spyOn(util, 'generateStatusToken')
+      .mockImplementationOnce(async () => WaitingNotInTaskMock.token);
+    jest
+      .spyOn(reader, 'isInTask')
+      .mockImplementation(async () => WaitingNotInTaskMock);
+    jest.spyOn(reader, 'isInWaiting').mockResolvedValue(WaitingNotInTaskMock);
+    jest.spyOn(manager, 'lpush').mockImplementationOnce(async () => null);
+
+    const result = await service.work(WaitingNotInTaskMock.token);
+
+    expect(result).toEqual(WaitingNotInTaskMock);
+
+    expect(util.generateStatusToken).toHaveBeenCalledTimes(0);
+    expect(reader.isInTask).toHaveBeenCalled();
+    expect(reader.isInWaiting).toHaveBeenCalled();
+    expect(manager.lpush).toHaveBeenCalledTimes(0);
+  });
+
+  it('in task, all skip', async () => {
+    WaitingNotInTaskMock.inTask = true;
+
+    jest
+      .spyOn(util, 'generateStatusToken')
+      .mockImplementationOnce(async () => WaitingNotInTaskMock.token);
+    jest
+      .spyOn(reader, 'isInTask')
+      .mockImplementation(async () => WaitingNotInTaskMock);
+    jest.spyOn(reader, 'isInWaiting').mockResolvedValue(WaitingNotInTaskMock);
+    jest.spyOn(manager, 'lpush').mockImplementationOnce(async () => null);
+
+    const result = await service.work(WaitingNotInTaskMock.token);
+
+    expect(result).toEqual(WaitingNotInTaskMock);
+
+    expect(util.generateStatusToken).toHaveBeenCalledTimes(0);
+    expect(reader.isInTask).toHaveBeenCalled();
+    expect(reader.isInWaiting).toHaveBeenCalledTimes(0);
+    expect(manager.lpush).toHaveBeenCalledTimes(0);
+  });
 });

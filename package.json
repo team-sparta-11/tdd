@@ -83,6 +83,9 @@
     "modulePaths": [
       "<rootDir>"
     ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/dist"
+    ],
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"

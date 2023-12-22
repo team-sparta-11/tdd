@@ -7,7 +7,7 @@ import { Cron } from '@nestjs/schedule';
 export class WaitingScheduleService {
   constructor(
     private readonly config: ConfigService,
-    private readonly redis: RedisClientService,
+    private readonly redis: RedisClientService, //todo => convert to manager
   ) {}
 
   /**
@@ -26,6 +26,12 @@ export class WaitingScheduleService {
     // get open count in task line
     const remains =
       moveCnt - (await this.redis.task.zcount('task', '-inf', '+inf')) - 1;
+
+    // console.log(
+    //   remains,
+    //   moveCnt,
+    //   await this.redis.task.zcount('task', '-inf', '+inf'),
+    // );
 
     // when no left open yet
     if (remains < 0) return true;
