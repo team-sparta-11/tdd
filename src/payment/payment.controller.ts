@@ -10,6 +10,7 @@ import { PaymentService } from './payment.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/common/decorator/get-user.decorator';
 import { UserEntity } from 'src/auth/struct/user.entity';
+import { Reservation } from 'src/reservation/reservation.domain';
 
 @Controller('payment')
 @UseGuards(AuthGuard('jwt'))
@@ -33,7 +34,7 @@ export class PaymentController {
   payReservation(
     @GetUser() user: UserEntity,
     @Body('reservationId', ParseIntPipe) reservationId: number,
-  ) {
+  ): Promise<Reservation> {
     return this.paymentService.payReservation({ user, reservationId });
   }
 }
