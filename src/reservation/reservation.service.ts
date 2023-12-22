@@ -9,6 +9,7 @@ import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { SeatEntity } from 'src/seat/seat.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './reservation.domain';
+import { RequestReservationDto } from './dto/request-reservation.dto';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -24,10 +25,12 @@ export class ReservationService {
 
   async requestReservation({
     requestReservationDto,
-    user,
+    userId,
+  }: {
+    requestReservationDto: RequestReservationDto;
+    userId: number;
   }): Promise<Reservation> {
     const { seatNumber, date } = requestReservationDto;
-    const { id: userId } = user;
 
     const seat = await this.seatRepository.findOne({
       where: { seatNumber, dateAvailability: { date } },
