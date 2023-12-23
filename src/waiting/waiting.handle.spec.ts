@@ -3,6 +3,7 @@ import { WaitingManager, WaitingReader } from './waiting.handler';
 import { createMock } from '@golevelup/ts-jest/lib/mocks';
 import { RedisClientService } from '../common/redis/redis.client-service';
 import { InTaskMock, WaitingNotInTaskMock } from './__mocks__';
+import { ModuleMetadata } from '@nestjs/common/interfaces/modules/module-metadata.interface';
 
 describe('WaitingHandle', () => {
   let manager: WaitingManager;
@@ -12,7 +13,7 @@ describe('WaitingHandle', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [WaitingManager, WaitingReader, RedisClientService],
-    })
+    } as ModuleMetadata)
       .useMocker(createMock)
       .compile();
 
@@ -21,15 +22,23 @@ describe('WaitingHandle', () => {
     redis = module.get<RedisClientService>(RedisClientService);
   });
 
-  it('manager lpush test', async () => {
+  it('manager enQueueToWaiting test', async () => {
     jest.spyOn(redis.waiting, 'zadd').mockImplementationOnce(async () => null);
     jest.spyOn(redis.waiting, 'zrank').mockImplementationOnce(async () => 0);
 
-    const result = await manager.lpush(WaitingNotInTaskMock.token);
+    const result = await manager.enQueueToWaiting(WaitingNotInTaskMock.token);
 
     expect(redis.waiting.zadd).toHaveBeenCalled();
     expect(redis.waiting.zrank).toHaveBeenCalled();
     expect(result).toEqual(WaitingNotInTaskMock);
+  });
+
+  it('manager enQueueToTask test', async () => {
+    jest.spyOn(redis.task, 'zadd').mockImplementationOnce(async () => null);
+
+    await manager.enQueueToTask(WaitingNotInTaskMock.token);
+
+    expect(redis.task.zadd).toHaveBeenCalled();
   });
 
   it('reader isInTask test', async () => {

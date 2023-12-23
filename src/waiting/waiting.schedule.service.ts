@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RedisClientService } from '../common/redis/redis.client-service';
 import { Cron } from '@nestjs/schedule';
+import { WaitingManager, WaitingReader } from './waiting.handler';
 
 @Injectable()
 export class WaitingScheduleService {
   constructor(
     private readonly config: ConfigService,
-    private readonly redis: RedisClientService, //todo => convert to manager
+    private readonly manager: WaitingManager,
+    private readonly reader: WaitingReader,
   ) {}
 
   /**
@@ -24,29 +25,18 @@ export class WaitingScheduleService {
     const moveCnt = this.config.get('appConfig')['maxTask'];
 
     // get open count in task line
-    const remains =
-      moveCnt - (await this.redis.task.zcount('task', '-inf', '+inf')) - 1;
-
-    // console.log(
-    //   remains,
-    //   moveCnt,
-    //   await this.redis.task.zcount('task', '-inf', '+inf'),
-    // );
+    const remains = await this.reader.getOpenTaskCnt(moveCnt);
 
     // when no left open yet
-    if (remains < 0) return true;
+    if (remains <= 0) return true;
 
     // de-queue
-    const waiters = await this.redis.waiting.zrange('wait', 0, remains);
-    await this.redis.waiting.zremrangebyrank('wait', 0, remains);
-
-    // new score for task line.
-    const taskScore = new Date().getTime();
+    const waiters = await this.manager.deQueueFromWaiting(remains);
 
     // en-queue for task line
     await Promise.all(
       waiters.map((token) => {
-        this.redis.task.zadd('task', taskScore, token);
+        this.manager.enQueueToTask(token);
       }),
     );
   }
@@ -58,10 +48,6 @@ export class WaitingScheduleService {
   @Cron('* * * * * *')
   async expire() {
     const remExpired = this.config.get('appConfig')['taskExpired'];
-    await this.redis.task.zremrangebyscore(
-      'task',
-      0,
-      new Date().getTime() - remExpired * 1000,
-    );
+    await this.manager.deQueueFromTask(remExpired);
   }
 }

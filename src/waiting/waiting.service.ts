@@ -21,7 +21,7 @@ export class WaitingService {
     const waitingToken = await this.reader.isInWaiting(statusToken);
     if (waitingToken) return waitingToken;
 
-    return this.manager.lpush(statusToken);
+    return this.manager.enQueueToWaiting(statusToken);
   }
 
   async forceMoveTask() {
