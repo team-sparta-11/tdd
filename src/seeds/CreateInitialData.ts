@@ -1,6 +1,6 @@
 import { Factory, Seeder } from 'typeorm-seeding';
 import { Connection } from 'typeorm';
-import { DateEntity } from '../seat/date.entity';
+import { DateEntity } from '../date/date.entity';
 import { SeatEntity } from '../seat/seat.entity';
 
 export default class CreateInitialData implements Seeder {

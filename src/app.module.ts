@@ -13,6 +13,7 @@ import { RedisClientModule } from './common/redis/redis.client-module';
 import { APP_GUARD } from '@nestjs/core';
 import { InTaskGuard } from './common/guard/InTask.guard';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DateModule } from './date/date.module';
 
 @Module({
   imports: [
@@ -25,6 +26,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     PaymentModule,
     SeatModule,
     ReservationModule,
+    WaitingModule,
+    DateModule,
   ],
   providers: [
     AppService,

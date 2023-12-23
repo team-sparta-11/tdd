@@ -10,6 +10,7 @@ import { SeatEntity } from 'src/seat/seat.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
+import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -18,9 +19,8 @@ export class ReservationService {
   constructor(
     private readonly reservationManager: ReservationManager,
     private readonly reservationReader: ReservationReader,
-
-    @InjectRepository(SeatEntity)
-    private seatRepository: Repository<SeatEntity>,
+    private readonly seatReader: SeatReader,
+    private readonly seatManager: SeatManager,
   ) {}
 
   async requestReservation({
@@ -32,8 +32,9 @@ export class ReservationService {
   }): Promise<Reservation> {
     const { seatNumber, date } = requestReservationDto;
 
-    const seat = await this.seatRepository.findOne({
-      where: { seatNumber, dateAvailability: { date } },
+    const seat = await this.seatReader.getSeat({
+      seatNumber,
+      dateAvailability: { date },
     });
 
     if (!seat) throw new BadRequestException('There is no seat');
@@ -42,7 +43,7 @@ export class ReservationService {
       throw new InternalServerErrorException('Seat is already reserved');
     }
 
-    await this.seatRepository.save({ ...seat, userId, isAvailable: false });
+    await this.seatManager.save({ ...seat, userId, isAvailable: false });
 
     const reservation = this.reservationManager.create({
       userId,
@@ -62,7 +63,7 @@ export class ReservationService {
       });
 
       if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
-        await this.seatRepository.save({
+        await this.seatManager.save({
           ...seat,
           userId: null,
           isAvailable: true,

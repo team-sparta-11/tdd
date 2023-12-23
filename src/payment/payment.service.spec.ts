@@ -11,7 +11,6 @@ import {
 import { PaymentnManager } from './payment.handler';
 
 import { User } from 'src/auth/struct/user.domain';
-import { Payment } from './payment.domain';
 import { Reservation } from 'src/reservation/reservation.domain';
 
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
@@ -168,7 +167,7 @@ describe('PaymentService', () => {
         user: mockUser,
         reservationId: mockReservation.id,
       });
-      expect(result).toEqual(paidReservation);
+      expect(result).toEqual(payment);
     });
   });
 });

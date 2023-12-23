@@ -5,7 +5,7 @@ import {
   OneToMany,
   BaseEntity,
 } from 'typeorm';
-import { SeatEntity } from './seat.entity';
+import { SeatEntity } from '../seat/seat.entity';
 
 @Entity()
 export class DateEntity extends BaseEntity {

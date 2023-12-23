@@ -17,6 +17,7 @@ import {
   ReservationReader,
 } from 'src/reservation/reservation.handler';
 import { PaymentnManager } from './payment.handler';
+import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 
 @Module({
   imports: [
@@ -38,6 +39,8 @@ import { PaymentnManager } from './payment.handler';
     ReservationManager,
     ReservationReader,
     PaymentnManager,
+    SeatReader,
+    SeatManager,
   ],
   controllers: [PaymentController],
 })
