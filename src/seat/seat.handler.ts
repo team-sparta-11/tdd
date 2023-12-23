@@ -1,11 +1,12 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 
 import { SeatEntity } from './seat.entity';
 import { Seat } from './seat.domain';
 
 interface Query<T> {
   getAvailableSeatByDate(date: string): Promise<T[]>;
+  getSeat(seatInfo: DeepPartial<T>): Promise<T>;
 }
 
 export class SeatReader implements Query<Seat> {
@@ -14,8 +15,12 @@ export class SeatReader implements Query<Seat> {
     private readonly seatRepository: Repository<SeatEntity>,
   ) {}
 
-  async getAvailableSeatByDate(date: string): Promise<Seat[]> {
-    return await this.seatRepository.find({
+  getSeat(seatInfo: DeepPartial<Seat>): Promise<Seat> {
+    return this.seatRepository.findOne({ where: seatInfo });
+  }
+
+  getAvailableSeatByDate(date: string): Promise<Seat[]> {
+    return this.seatRepository.find({
       relations: ['dateAvailability'],
       where: {
         dateAvailability: {
@@ -27,5 +32,19 @@ export class SeatReader implements Query<Seat> {
         seatNumber: 'ASC',
       },
     });
+  }
+}
+
+interface Command<T> {
+  save(user: T): Promise<T>;
+}
+export class SeatManager implements Command<Seat> {
+  constructor(
+    @InjectRepository(SeatEntity)
+    private readonly seatRepository: Repository<SeatEntity>,
+  ) {}
+
+  async save(seat: Seat): Promise<Seat> {
+    return this.seatRepository.save(seat);
   }
 }
