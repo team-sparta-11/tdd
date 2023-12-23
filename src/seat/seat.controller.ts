@@ -7,13 +7,10 @@ import { SeatService } from './seat.service';
 export class SeatController {
   constructor(private seatService: SeatService) {}
 
-  @Get('/available')
-  getAvailableDates(): Promise<string[]> {
-    return this.seatService.getAvailableDates();
-  }
-
   @Get('/available/:date')
-  getAvailableSeatsByDate(@Param('date') date: string): Promise<number[]> {
+  async getAvailableSeatsByDate(
+    @Param('date') date: string,
+  ): Promise<number[]> {
     return this.seatService.getAvailableSeatsByDate(date);
   }
 }

@@ -8,8 +8,9 @@ import { jwtConfig } from 'src/common/config/jwt.config';
 import { ReservationEntity } from './reservation.entity';
 import { SeatEntity } from 'src/seat/seat.entity';
 import { SeatService } from 'src/seat/seat.service';
-import { DateEntity } from 'src/seat/date.entity';
+import { DateEntity } from 'src/date/date.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
+import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 
 @Module({
   imports: [
@@ -23,6 +24,8 @@ import { ReservationManager, ReservationReader } from './reservation.handler';
     SeatService,
     ReservationManager,
     ReservationReader,
+    SeatReader,
+    SeatManager,
   ],
 })
 export class ReservationModule {}
