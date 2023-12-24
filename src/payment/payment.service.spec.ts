@@ -31,6 +31,14 @@ const mockReservation: Reservation = {
   paymentStatus: PAYMENT_STATUS.UNPAID,
 };
 
+jest.mock('typeorm-transactional', () => ({
+  Transactional: () => () => ({}),
+  runOnTransactionCommit: () => () => ({}),
+  runOnTransactionRollback: () => () => ({}),
+  runOnTransactionComplete: () => () => ({}),
+  initializeTransactionalContext: () => ({}),
+}));
+
 describe('PaymentService', () => {
   let service: PaymentService;
   let userManager: UserManager;

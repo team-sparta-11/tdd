@@ -6,6 +6,7 @@ import {
 } from 'src/reservation/reservation.handler';
 import { UserManager } from 'src/auth/user.handler';
 import { PaymentnManager } from './payment.handler';
+import { Transactional } from 'typeorm-transactional';
 
 export const PRICE = 10000;
 
@@ -33,6 +34,7 @@ export class PaymentService {
     return newBalance;
   }
 
+  @Transactional()
   async payReservation({ user, reservationId }) {
     if (user.balance < PRICE) {
       throw new InternalServerErrorException('Balance is not enough to pay');
