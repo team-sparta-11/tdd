@@ -13,8 +13,9 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "cross-env NODE_ENV=prod node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
+    "test": "jest --testMatch \"**/src/**/?(*.)+(spec).ts\"",
+    "test:watch": "jest --testMatch \"**/src/**/?(*.)+(spec).ts\" --watch",
+    "test:itg": "TEST_TYPE=itg jest --testMatch \"**/src/**/?(*.)+(test).ts\" --runInBand --detectOpenHandles --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
@@ -49,6 +50,7 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",
+    "@testcontainers/postgresql": "^10.4.0",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
@@ -65,6 +67,7 @@
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",
     "supertest": "^6.3.3",
+    "testcontainers": "^10.4.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
@@ -82,7 +85,6 @@
     "modulePaths": [
       "<rootDir>"
     ],
-    "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
@@ -90,7 +92,11 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "<rootDir>/test/setups/afterEnv.ts"
+    ],
+    "testTimeout": 120000
   },
   "packageManager": "^pnpm@8.11.0"
 }
