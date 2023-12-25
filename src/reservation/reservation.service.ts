@@ -9,8 +9,7 @@ import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { Transactional } from 'typeorm-transactional';
-
-const FIVE_MINUTES = 5 * 60 * 1000;
+import { Seat } from 'src/seat/seat.domain';
 
 @Injectable()
 export class ReservationService {
@@ -54,27 +53,32 @@ export class ReservationService {
 
     await this.reservationManager.save(reservation);
 
-    setTimeout(async () => {
-      const afterReservation = await this.reservationReader.findOne({
-        userId,
-        seatNumber,
-        date,
-      });
-
-      if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
-        await this.seatManager.save({
-          ...seat,
-          userId: null,
-          isAvailable: true,
-        });
-      }
-
-      await this.reservationManager.save({
-        ...reservation,
-        isExpired: true,
-      });
-    }, FIVE_MINUTES);
+    this.batchAfterReservation({ seat, reservation });
 
     return reservation;
+  }
+
+  @Transactional()
+  async batchAfterReservation({
+    seat,
+    reservation,
+  }: {
+    seat: Seat;
+    reservation: Reservation;
+  }) {
+    const afterReservation = await this.reservationReader.findOne(reservation);
+
+    if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
+      await this.seatManager.save({
+        ...seat,
+        userId: null,
+        isAvailable: true,
+      });
+    }
+
+    await this.reservationManager.save({
+      ...reservation,
+      isExpired: true,
+    });
   }
 }
