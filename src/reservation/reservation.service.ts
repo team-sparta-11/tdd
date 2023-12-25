@@ -3,14 +3,12 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
-import { SeatEntity } from 'src/seat/seat.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
+import { Transactional } from 'typeorm-transactional';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -23,6 +21,7 @@ export class ReservationService {
     private readonly seatManager: SeatManager,
   ) {}
 
+  @Transactional()
   async requestReservation({
     requestReservationDto,
     userId,
