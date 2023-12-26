@@ -15,6 +15,7 @@ import { Reservation } from 'src/reservation/reservation.domain';
 
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { initializeTransactionalContext } from 'typeorm-transactional';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const mockUser: User = {
   id: 1,
@@ -69,6 +70,7 @@ describe('PaymentService', () => {
             save: jest.fn(),
           },
         },
+        EventEmitter2,
       ],
     }).compile();
 
