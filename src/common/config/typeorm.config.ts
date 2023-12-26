@@ -5,10 +5,26 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
 
 const EXTERNAL_DB_ENVS = new Set(['production']);
 
+const ENV_ITG = process.env.NODE_ENV === 'itg';
+
 export const typeORMConfig = {
   imports: [ConfigModule],
   inject: [ConfigService],
   useFactory: (configService: ConfigService): TypeOrmModuleOptions => {
+    // jest can't use configService
+    if (ENV_ITG) {
+      return {
+        type: 'postgres',
+        host: '127.0.0.1',
+        port: global.testPgPort,
+        username: 'test',
+        password: 'test',
+        database: 'test',
+        autoLoadEntities: true,
+        synchronize: true,
+      };
+    }
+
     return {
       type: 'postgres',
       host: configService.get<string>('DB_HOST'),
@@ -28,9 +44,16 @@ export const typeORMConfig = {
       }),
     };
   },
+
   async dataSourceFactory(options) {
     if (!options) {
       throw new Error('Invalid options passed');
+    }
+
+    // @TODO: `addTransactionalDataSource` can't find testcontainers port
+    // so use default datasource, should make it work, even use `addTransactionalDataSource`
+    if (ENV_ITG) {
+      return new DataSource(options);
     }
 
     return addTransactionalDataSource(new DataSource(options));
