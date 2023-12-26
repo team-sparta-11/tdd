@@ -54,7 +54,7 @@ describe('reservation transaction', () => {
     await em.delete(ReservationEntity, {});
   });
 
-  it('Should reserved a user when multiple users reservate same seat', async () => {
+  it('Should reserve a one user when multiple users reservate same seat', async () => {
     const requestReservationDto = (userId: number) => ({
       userId,
       date,
