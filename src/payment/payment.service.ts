@@ -5,7 +5,7 @@ import {
   ReservationReader,
 } from 'src/reservation/reservation.handler';
 import { UserManager } from 'src/auth/user.handler';
-import { PaymentnManager } from './payment.handler';
+import { PaymentManager } from './payment.handler';
 import { Transactional } from 'typeorm-transactional';
 
 export const PRICE = 10000;
@@ -16,7 +16,7 @@ export class PaymentService {
     private userManager: UserManager,
     private reservationManager: ReservationManager,
     private reservationReader: ReservationReader,
-    private paymentManager: PaymentnManager,
+    private paymentManager: PaymentManager,
   ) {}
 
   async chargeBalance({ user, amount }) {

@@ -9,7 +9,7 @@ interface Command<T> {
   save(reservation: T): Promise<T>;
 }
 
-export class PaymentnManager implements Command<Payment> {
+export class PaymentManager implements Command<Payment> {
   constructor(
     @InjectRepository(PaymentEntity)
     private readonly paymentRepository: Repository<PaymentEntity>,
