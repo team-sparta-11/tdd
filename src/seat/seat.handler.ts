@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
-import { SeatEntity } from './seat.entity';
-import { Seat } from './seat.domain';
+import { SeatEntity } from './struct/seat.entity';
+import { Seat } from './struct/seat.domain';
 
 interface Query<T> {
   getAvailableSeatByDate(date: string): Promise<T[]>;
