@@ -55,14 +55,19 @@ describe('ReservationManager and ReservationReader', () => {
   });
 
   it('should save a reservation', async () => {
+    const updatedReservation = {
+      ...fakeReservation,
+      paymentStatus: PAYMENT_STATUS.PAID,
+    };
+
     jest
       .spyOn(reservationRepository, 'save')
-      .mockResolvedValue(fakeReservation as ReservationEntity);
+      .mockResolvedValue(updatedReservation as ReservationEntity);
 
-    const result = await reservationManager.save(fakeReservation);
+    const result = await reservationManager.save(updatedReservation);
 
-    expect(reservationRepository.save).toHaveBeenCalledWith(fakeReservation);
-    expect(result).toEqual(fakeReservation);
+    expect(reservationRepository.save).toHaveBeenCalledWith(updatedReservation);
+    expect(result).toEqual(updatedReservation);
   });
 
   it('should find a reservation', async () => {
