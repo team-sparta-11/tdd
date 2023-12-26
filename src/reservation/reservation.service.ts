@@ -8,7 +8,7 @@ import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
-import { Transactional } from 'typeorm-transactional';
+import { Propagation, Transactional } from 'typeorm-transactional';
 import { Seat } from 'src/seat/seat.domain';
 
 @Injectable()
@@ -58,7 +58,7 @@ export class ReservationService {
     return reservation;
   }
 
-  @Transactional()
+  @Transactional({ propagation: Propagation.REQUIRES_NEW })
   async batchAfterReservation({
     seat,
     reservation,
