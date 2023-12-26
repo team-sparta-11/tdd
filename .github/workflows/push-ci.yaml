@@ -38,12 +38,12 @@ jobs:
       - if: ${{ startsWith(github.ref, 'refs/heads') && !startsWith(github.ref, 'refs/heads/main') }}
         run: |
           pnpm install --frozen-lockfile
-          NODE_ENV=development pnpm test:itg
+          NODE_ENV=development pnpm test:itg:ci
 
       - if: ${{ startsWith(github.ref, 'refs/heads/main') }}
         run: |
           pnpm install --frozen-lockfile
-          NODE_ENV=production pnpm test:itg
+          NODE_ENV=production pnpm test:itg:ci
 
   app_build:
     runs-on: ubuntu-latest

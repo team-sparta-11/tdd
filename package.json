@@ -16,6 +16,7 @@
     "test": "jest --testMatch \"**/src/**/?(*.)+(spec).ts\"",
     "test:watch": "jest --testMatch \"**/src/**/?(*.)+(spec).ts\" --watch",
     "test:itg": "cross-env NODE_ENV=itg jest --testMatch \"**/src/**/?(*.)+(test).ts\" --runInBand --detectOpenHandles --watch",
+    "test:itg:ci": "cross-env NODE_ENV=itg jest --testMatch \"**/src/**/?(*.)+(test).ts\" --runInBand --detectOpenHandles",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
