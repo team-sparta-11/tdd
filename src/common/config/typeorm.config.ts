@@ -50,8 +50,7 @@ export const typeORMConfig = {
       throw new Error('Invalid options passed');
     }
 
-    // @TODO: `addTransactionalDataSource` can't find testcontainers port
-    // so use default datasource, should make it work, even use `addTransactionalDataSource`
+    // @TODO: `addTransactionalDataSource` not work with testcontainers, fix it
     if (ENV_ITG) {
       return new DataSource(options);
     }
