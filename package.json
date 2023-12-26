@@ -101,7 +101,7 @@
     "setupFilesAfterEnv": [
       "<rootDir>/test/setups/afterEnv.ts"
     ],
-    "testTimeout": 120000
+    "testTimeout": 60000
   },
   "packageManager": "^pnpm@8.11.0"
 }
