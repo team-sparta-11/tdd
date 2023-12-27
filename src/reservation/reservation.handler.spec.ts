@@ -49,7 +49,6 @@ describe('ReservationManager and ReservationReader', () => {
 
     const result = reservationManager.create(fakeReservation);
 
-    expect(reservationRepository.create).toHaveBeenCalled();
     expect(reservationRepository.create).toHaveBeenCalledWith(fakeReservation);
     expect(result).toEqual(fakeReservation);
   });
