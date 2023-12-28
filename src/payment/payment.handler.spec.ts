@@ -26,15 +26,15 @@ describe('PaymentManager', () => {
     );
   });
 
-  it('should create a payment', async () => {
-    const mockPayment = {
-      userId: 1,
-      amount: 10000,
-      paymentDate: '2024-01-01',
-      status: PAYMENT_STATUS.UNPAID,
-      reservationId: 1,
-    };
+  const mockPayment = {
+    userId: 1,
+    amount: 10000,
+    paymentDate: '2024-01-01',
+    status: PAYMENT_STATUS.UNPAID,
+    reservationId: 1,
+  };
 
+  it('should create a payment', async () => {
     const createSpy = jest
       .spyOn(paymentRepository, 'create')
       .mockReturnValue(mockPayment as PaymentEntity);
@@ -46,14 +46,6 @@ describe('PaymentManager', () => {
   });
 
   it('should save a payment', async () => {
-    const mockPayment = {
-      userId: 1,
-      amount: 10000,
-      paymentDate: '2024-01-01',
-      status: PAYMENT_STATUS.UNPAID,
-      reservationId: 1,
-    };
-
     const mockPaymentWithId = {
       ...mockPayment,
       id: 1,
