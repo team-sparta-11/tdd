@@ -5,8 +5,8 @@ import { SeatEntity } from './struct/seat.entity';
 import { Seat } from './struct/seat.domain';
 
 interface Query<T> {
-  getAvailableSeatByDate(date: string): Promise<T[]>;
   getSeat(seatInfo: DeepPartial<T>): Promise<T>;
+  getAvailableSeatByDate(date: string): Promise<number[]>;
 }
 
 export class SeatReader implements Query<Seat> {
@@ -19,8 +19,8 @@ export class SeatReader implements Query<Seat> {
     return this.seatRepository.findOne({ where: seatInfo });
   }
 
-  getAvailableSeatByDate(date: string): Promise<Seat[]> {
-    return this.seatRepository.find({
+  async getAvailableSeatByDate(date: string): Promise<number[]> {
+    const seats = await this.seatRepository.find({
       relations: ['dateAvailability'],
       where: {
         dateAvailability: {
@@ -32,6 +32,8 @@ export class SeatReader implements Query<Seat> {
         seatNumber: 'ASC',
       },
     });
+
+    return seats.map((seat) => seat.seatNumber);
   }
 }
 
