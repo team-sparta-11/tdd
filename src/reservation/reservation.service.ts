@@ -60,11 +60,12 @@ export class ReservationService {
 
     await this.reservationManager.save(reservation);
 
-    this.batchAfterReservation({ seat, reservation });
+    // TODO: add schedule job after 5min
 
     return reservation;
   }
 
+  // TODO: delete Transactional decorator if e2e module issue is not fixed
   @Transactional({ propagation: Propagation.REQUIRES_NEW })
   async batchAfterReservation({
     seat,
