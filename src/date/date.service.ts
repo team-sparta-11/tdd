@@ -5,9 +5,7 @@ import { DateReader } from './date.handler';
 export class DateService {
   constructor(private dateReader: DateReader) {}
 
-  async getAvailableDates(): Promise<string[]> {
-    const dates = await this.dateReader.getAvailableDates();
-
-    return dates.map((date) => date.date);
+  getAvailableDates(): Promise<string[]> {
+    return this.dateReader.getAvailableDates();
   }
 }

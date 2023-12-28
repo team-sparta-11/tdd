@@ -46,6 +46,7 @@ describe('DateReader', () => {
       },
     });
 
-    expect(result).toEqual(mockDates as DateEntity[]);
+    const expectedDates = mockDates.map((date) => date.date);
+    expect(result).toEqual(expectedDates as string[]);
   });
 });
