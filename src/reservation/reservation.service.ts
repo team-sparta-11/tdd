@@ -9,7 +9,7 @@ import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
-import { SeatEntity } from 'src/seat/seat.entity';
+import { SeatEntity } from 'src/seat/struct/seat.entity';
 import { Transactional } from 'typeorm-transactional';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
 
@@ -85,11 +85,13 @@ export class ReservationService {
 
   /** @TODO: this method is experimental for testing use real one  */
   async experimentalRequestReservation({
+    userId,
     requestReservationDto,
   }: {
+    userId: number;
     requestReservationDto: RequestReservationDto;
   }) {
-    const { seatNumber, date, userId } = requestReservationDto;
+    const { seatNumber, date } = requestReservationDto;
 
     const queryRunner = this.dataSource.createQueryRunner();
 

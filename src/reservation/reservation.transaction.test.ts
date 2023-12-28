@@ -1,14 +1,14 @@
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SeatEntity } from 'src/seat/seat.entity';
+import { SeatEntity } from 'src/seat/struct/seat.entity';
 import { ReservationEntity } from './reservation.entity';
 import { ReservationService } from './reservation.service';
-import { typeORMConfig } from 'src/common/config/typeorm.config';
+import { typeORMAsyncConfig } from 'src/common/config/typeorm.config';
 import { ReservationModule } from './reservation.module';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { EntityManager } from 'typeorm';
-import { DateEntity } from 'src/date/date.entity';
+import { DateEntity } from 'src/date/struct/date.entity';
 
 const date = '2024-01-01';
 const seatNumber = 1;
@@ -22,8 +22,8 @@ describe('reservation transaction', () => {
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRootAsync(typeORMConfig),
         TypeOrmModule.forFeature([SeatEntity, ReservationEntity]),
+        TypeOrmModule.forRootAsync(typeORMAsyncConfig),
         ReservationModule,
       ],
       providers: [
@@ -55,24 +55,27 @@ describe('reservation transaction', () => {
   });
 
   it('Should reserve a one user when multiple users reservate same seat', async () => {
-    const requestReservationDto = (userId: number) => ({
-      userId,
+    const requestReservationDto = {
       date,
       seatNumber,
-    });
+    };
 
     await Promise.all([
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(1),
+        userId: 1,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(2),
+        userId: 2,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(3),
+        userId: 3,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(4),
+        userId: 4,
+        requestReservationDto: requestReservationDto,
       }),
     ]);
 
@@ -81,24 +84,27 @@ describe('reservation transaction', () => {
   });
 
   it('Should not reserved when seat is not exist', async () => {
-    const requestReservationDto = (userId: number) => ({
-      userId,
+    const requestReservationDto = {
       date,
-      seatNumber: 3,
-    });
+      seatNumber: 2,
+    };
 
     await Promise.all([
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(1),
+        userId: 1,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(2),
+        userId: 2,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(3),
+        userId: 3,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(4),
+        userId: 4,
+        requestReservationDto: requestReservationDto,
       }),
     ]);
 
@@ -108,29 +114,32 @@ describe('reservation transaction', () => {
 
   it('Should not reserved when seat is already used', async () => {
     await em.save(SeatEntity, {
-      seatNumber: 2,
+      seatNumber: 3,
       isAvailable: false,
       dateAvailability: dateResult,
     });
 
-    const requestReservationDto = (userId: number) => ({
-      userId,
+    const requestReservationDto = {
       date,
-      seatNumber: 2,
-    });
+      seatNumber: 3,
+    };
 
     await Promise.all([
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(1),
+        userId: 1,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(2),
+        userId: 2,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(3),
+        userId: 3,
+        requestReservationDto: requestReservationDto,
       }),
       service.experimentalRequestReservation({
-        requestReservationDto: requestReservationDto(4),
+        userId: 4,
+        requestReservationDto: requestReservationDto,
       }),
     ]);
 
