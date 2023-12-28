@@ -9,7 +9,7 @@ import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { Propagation, Transactional } from 'typeorm-transactional';
-import { Seat } from 'src/seat/seat.domain';
+import { Seat } from 'src/seat/struct/seat.domain';
 
 @Injectable()
 export class ReservationService {
