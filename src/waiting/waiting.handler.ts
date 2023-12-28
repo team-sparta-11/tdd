@@ -1,35 +1,59 @@
 import { RedisClientService } from '../common/redis/redis.client-service';
-import { WaitingToken } from '../types/waiting';
+import { WaitingToken } from '../common/types/waiting';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 
 interface Command<T> {
-  lpush(token: T): Promise<WaitingToken>;
+  enQueueToWaiting(token: T): Promise<WaitingToken>;
+  enQueueToTask(token: string): Promise<void>;
+  deQueueFromWaiting(cnt: number): Promise<string[]>;
+  deQueueFromTaskByExpired(cnt: number): Promise<void>;
+  deQueueFromTaskByToken(token: string): void;
 }
 
 @Injectable()
 export class WaitingManager implements Command<string> {
   constructor(private readonly redis: RedisClientService) {}
 
-  async lpush(token: string): Promise<WaitingToken> {
+  async enQueueToWaiting(token: string): Promise<WaitingToken> {
     const score = new Date().getTime();
     await this.redis.waiting.zadd('wait', score, token);
     const rank = +(await this.redis.waiting.zrank('wait', token)) + 1;
     return { rank, token, inTask: false };
+  }
+
+  async enQueueToTask(token: string) {
+    const taskScore = new Date().getTime();
+    this.redis.task.zadd('task', taskScore, token);
+  }
+
+  async deQueueFromWaiting(cnt: number) {
+    const waiters = this.redis.waiting.zrange('wait', 0, cnt);
+    await this.redis.waiting.zremrangebyrank('wait', 0, cnt);
+    return waiters;
+  }
+
+  async deQueueFromTaskByExpired(remExpired: number) {
+    await this.redis.task.zremrangebyscore(
+      'task',
+      0,
+      new Date().getTime() - remExpired * 1000,
+    );
+  }
+
+  deQueueFromTaskByToken(token: string) {
+    this.redis.task.zrem('task', token);
   }
 }
 
 interface Query<T> {
   isInTask(token: T): Promise<WaitingToken>;
   isInWaiting(token: T): Promise<WaitingToken | false>;
+  getOpenTaskCnt(maxTaskCount: number): Promise<number>;
 }
 
 @Injectable()
 export class WaitingReader implements Query<string> {
-  constructor(
-    private readonly config: ConfigService,
-    private readonly redis: RedisClientService,
-  ) {}
+  constructor(private readonly redis: RedisClientService) {}
 
   async isInTask(token: string): Promise<WaitingToken> {
     return {
@@ -49,5 +73,11 @@ export class WaitingReader implements Query<string> {
       token,
       inTask: false,
     };
+  }
+
+  async getOpenTaskCnt(maxTaskCount: number) {
+    return (
+      maxTaskCount - (await this.redis.task.zcount('task', '-inf', '+inf'))
+    );
   }
 }

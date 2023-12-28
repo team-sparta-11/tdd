@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { DateController } from './date.controller';
 import { DateService } from './date.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DateEntity } from './date.entity';
+import { DateEntity } from './struct/date.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfig } from 'src/common/config/jwt.config';

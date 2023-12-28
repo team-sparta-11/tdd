@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { DateEntity } from './date.entity';
-import { Date } from './date.domain';
+import { DateEntity } from './struct/date.entity';
+import { Date } from './struct/date.domain';
 
 interface Query<T> {
   getAvailableDates(): Promise<T[]>;

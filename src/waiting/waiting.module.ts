@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { WaitingController } from './waiting.controller';
 import { WaitingService } from './waiting.service';
-import { RedisClientService } from '../common/redis/redis.client-service';
 import { WaitingUtil } from './waiting.util';
 import { WaitingScheduleService } from './waiting.schedule.service';
 import { WaitingManager, WaitingReader } from './waiting.handler';
+import { WaitingListener } from './waiting.listener';
 
 @Module({
   controllers: [WaitingController],
@@ -14,7 +14,7 @@ import { WaitingManager, WaitingReader } from './waiting.handler';
     WaitingReader,
     WaitingUtil,
     WaitingScheduleService,
-    RedisClientService,
+    WaitingListener,
   ],
 })
 export class WaitingModule {}

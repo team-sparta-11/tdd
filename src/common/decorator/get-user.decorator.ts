@@ -5,6 +5,8 @@ export const GetUser = createParamDecorator(
   (data, ctx: ExecutionContext): UserEntity => {
     const req = ctx.switchToHttp().getRequest();
 
+    req.user['statusToken'] = req.headers['status-token'];
+
     return req.user;
   },
 );
