@@ -1,4 +1,4 @@
-import { Date } from 'src/date/date.domain';
+import { Date } from 'src/date/struct/date.domain';
 
 export interface Seat {
   id: number;

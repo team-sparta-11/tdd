@@ -5,7 +5,9 @@ import { GetUser } from 'src/common/decorator/get-user.decorator';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { Reservation } from './reservation.domain';
 import { User } from 'src/auth/struct/user.domain';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('reservation')
 @Controller('reservation')
 @UseGuards(AuthGuard('jwt'))
 export class ReservationController {

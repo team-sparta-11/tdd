@@ -8,13 +8,14 @@ import {
   ReservationManager,
   ReservationReader,
 } from 'src/reservation/reservation.handler';
-import { PaymentnManager } from './payment.handler';
+import { PaymentManager } from './payment.handler';
 
 import { User } from 'src/auth/struct/user.domain';
 import { Reservation } from 'src/reservation/reservation.domain';
 
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { initializeTransactionalContext } from 'typeorm-transactional';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const mockUser: User = {
   id: 1,
@@ -37,7 +38,7 @@ describe('PaymentService', () => {
   let userManager: UserManager;
   let reservationManager: ReservationManager;
   let reservationReader: ReservationReader;
-  let paymentManager: PaymentnManager;
+  let paymentManager: PaymentManager;
 
   beforeEach(async () => {
     initializeTransactionalContext();
@@ -63,12 +64,13 @@ describe('PaymentService', () => {
           },
         },
         {
-          provide: PaymentnManager,
+          provide: PaymentManager,
           useValue: {
             create: jest.fn(),
             save: jest.fn(),
           },
         },
+        EventEmitter2,
       ],
     }).compile();
 
@@ -76,7 +78,7 @@ describe('PaymentService', () => {
     userManager = module.get<UserManager>(UserManager);
     reservationManager = module.get<ReservationManager>(ReservationManager);
     reservationReader = module.get<ReservationReader>(ReservationReader);
-    paymentManager = module.get<PaymentnManager>(PaymentnManager);
+    paymentManager = module.get<PaymentManager>(PaymentManager);
   });
 
   it('should be defined', () => {
