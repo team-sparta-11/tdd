@@ -9,8 +9,9 @@ import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './reservation.domain';
 import { RequestReservationDto } from './dto/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
+import { Propagation, Transactional } from 'typeorm-transactional';
+import { Seat } from 'src/seat/struct/seat.domain';
 import { SeatEntity } from 'src/seat/struct/seat.entity';
-import { Transactional } from 'typeorm-transactional';
 import { ReservationEntity } from 'src/reservation/reservation.entity';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
@@ -59,28 +60,34 @@ export class ReservationService {
 
     await this.reservationManager.save(reservation);
 
-    setTimeout(async () => {
-      const afterReservation = await this.reservationReader.findOne({
-        userId,
-        seatNumber,
-        date,
-      });
-
-      if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
-        await this.seatManager.save({
-          ...seat,
-          userId: null,
-          isAvailable: true,
-        });
-      }
-
-      await this.reservationManager.save({
-        ...reservation,
-        isExpired: true,
-      });
-    }, FIVE_MINUTES);
+    // TODO: add schedule job after 5min
 
     return reservation;
+  }
+
+  // TODO: delete Transactional decorator if e2e module issue is not fixed
+  @Transactional({ propagation: Propagation.REQUIRES_NEW })
+  async batchAfterReservation({
+    seat,
+    reservation,
+  }: {
+    seat: Seat;
+    reservation: Reservation;
+  }) {
+    const afterReservation = await this.reservationReader.findOne(reservation);
+
+    if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
+      await this.seatManager.save({
+        ...seat,
+        userId: null,
+        isAvailable: true,
+      });
+    }
+
+    await this.reservationManager.save({
+      ...reservation,
+      isExpired: true,
+    });
   }
 
   /** @TODO: this method is experimental for testing use real one  */

@@ -1,6 +1,4 @@
-const typeOrmTransactional = jest.createMockFromModule(
-  './typeorm-transactional',
-);
+const typeOrmTransactional = jest.createMockFromModule('typeorm-transactional');
 
 typeOrmTransactional.Transactional = () => () => ({});
 typeOrmTransactional.runOnTransactionCommit = () => () => ({});
