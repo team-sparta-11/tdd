@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { createMock } from '@golevelup/ts-jest/lib/mocks';
-import { RedisClientService } from '../common/redis/redis.client-service';
 import { WaitingNotInTaskMock } from './__mocks__';
 import { WaitingScheduleService } from './waiting.schedule.service';
 import { ConfigService } from '@nestjs/config/dist/config.service';

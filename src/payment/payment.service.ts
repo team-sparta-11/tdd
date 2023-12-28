@@ -7,6 +7,7 @@ import {
 import { UserManager } from 'src/auth/user.handler';
 import { PaymentManager } from './payment.handler';
 import { Transactional } from 'typeorm-transactional';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 export const PRICE = 10000;
 
@@ -17,21 +18,18 @@ export class PaymentService {
     private reservationManager: ReservationManager,
     private reservationReader: ReservationReader,
     private paymentManager: PaymentManager,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async chargeBalance({ user, amount }) {
-    const currentBalance = user.balance;
-
-    const newBalance = currentBalance + amount;
-
     const newUser = {
       ...user,
-      balance: newBalance,
+      balance: user.balance + amount,
     };
 
     await this.userManager.save(newUser);
 
-    return newBalance;
+    return newUser.balance;
   }
 
   @Transactional()
@@ -70,6 +68,8 @@ export class PaymentService {
     });
 
     await this.paymentManager.save(payment);
+
+    this.eventEmitter.emit('task.done', { token: user['statusToken'] });
 
     return payment;
   }

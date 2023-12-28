@@ -6,7 +6,8 @@ interface Command<T> {
   enQueueToWaiting(token: T): Promise<WaitingToken>;
   enQueueToTask(token: string): Promise<void>;
   deQueueFromWaiting(cnt: number): Promise<string[]>;
-  deQueueFromTask(cnt: number): Promise<void>;
+  deQueueFromTaskByExpired(cnt: number): Promise<void>;
+  deQueueFromTaskByToken(token: string): void;
 }
 
 @Injectable()
@@ -31,12 +32,16 @@ export class WaitingManager implements Command<string> {
     return waiters;
   }
 
-  async deQueueFromTask(remExpired: number) {
+  async deQueueFromTaskByExpired(remExpired: number) {
     await this.redis.task.zremrangebyscore(
       'task',
       0,
       new Date().getTime() - remExpired * 1000,
     );
+  }
+
+  deQueueFromTaskByToken(token: string) {
+    this.redis.task.zrem('task', token);
   }
 }
 

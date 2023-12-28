@@ -48,6 +48,6 @@ export class WaitingScheduleService {
   @Cron('* * * * * *')
   async expire() {
     const remExpired = this.config.get('appConfig')['taskExpired'];
-    await this.manager.deQueueFromTask(remExpired);
+    await this.manager.deQueueFromTaskByExpired(remExpired);
   }
 }
