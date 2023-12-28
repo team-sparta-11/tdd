@@ -5,12 +5,10 @@ import {
 } from '@nestjs/common';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { ReservationManager, ReservationReader } from './reservation.handler';
-import { Reservation } from './reservation.domain';
-import { RequestReservationDto } from './dto/request-reservation.dto';
+import { Reservation } from './struct/reservation.domain';
+import { RequestReservationDto } from './struct/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { Transactional } from 'typeorm-transactional';
-
-const FIVE_MINUTES = 5 * 60 * 1000;
 
 @Injectable()
 export class ReservationService {
@@ -36,45 +34,18 @@ export class ReservationService {
       dateAvailability: { date },
     });
 
+    const exists = await this.reservationReader.findOne({ seatNumber, date });
+
     if (!seat) throw new BadRequestException('There is no seat');
 
-    if (!seat.isAvailable) {
+    if (seat.userId || exists) {
       throw new InternalServerErrorException('Seat is already reserved');
     }
 
-    await this.seatManager.save({ ...seat, userId, isAvailable: false });
-
-    const reservation = this.reservationManager.create({
+    return await this.reservationManager.save({
       userId,
       seatNumber,
       date,
-      paymentStatus: PAYMENT_STATUS.UNPAID,
-      isExpired: false,
     });
-
-    await this.reservationManager.save(reservation);
-
-    setTimeout(async () => {
-      const afterReservation = await this.reservationReader.findOne({
-        userId,
-        seatNumber,
-        date,
-      });
-
-      if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
-        await this.seatManager.save({
-          ...seat,
-          userId: null,
-          isAvailable: true,
-        });
-      }
-
-      await this.reservationManager.save({
-        ...reservation,
-        isExpired: true,
-      });
-    }, FIVE_MINUTES);
-
-    return reservation;
   }
 }

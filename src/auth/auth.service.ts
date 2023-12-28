@@ -20,7 +20,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<User> {
+  async createUser(
+    authCredentialsDto: AuthCredentialsDto,
+  ): Promise<Omit<User, 'password'>> {
     const { email, password } = authCredentialsDto;
 
     const salt = await bcrypt.genSalt();
@@ -32,7 +34,9 @@ export class AuthService {
     });
 
     try {
-      return await this.userManager.save(user);
+      const { password: _, ...passwordOmittedUser } =
+        await this.userManager.save(user);
+      return passwordOmittedUser;
     } catch (error) {
       throw new InternalServerErrorException('Sign up failed');
     }

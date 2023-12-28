@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 
-import { PaymentEntity } from './payment.entity';
-import { Payment } from './payment.domain';
+import { PaymentEntity } from './struct/payment.entity';
+import { Payment } from './struct/payment.domain';
 
 interface Command<T> {
   create(reservation: T): DeepPartial<T>;

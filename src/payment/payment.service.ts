@@ -8,6 +8,7 @@ import { UserManager } from 'src/auth/user.handler';
 import { PaymentManager } from './payment.handler';
 import { Transactional } from 'typeorm-transactional';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { SeatManager } from '../seat/seat.handler';
 
 export const PRICE = 10000;
 
@@ -18,6 +19,7 @@ export class PaymentService {
     private reservationManager: ReservationManager,
     private reservationReader: ReservationReader,
     private paymentManager: PaymentManager,
+    private seatManager: SeatManager,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -33,29 +35,23 @@ export class PaymentService {
   }
 
   @Transactional()
-  async payReservation({ user, reservationId }) {
+  async payReservation({ user, seatNumber, date }) {
     if (user.balance < PRICE) {
       throw new InternalServerErrorException('Balance is not enough to pay');
     }
 
     const reservation = await this.reservationReader.findOne({
-      id: reservationId,
+      seatNumber,
+      date,
     });
 
     if (!reservation) {
-      throw new InternalServerErrorException('Reservation is not on list');
+      throw new InternalServerErrorException(
+        'Reservation is not on list or expired',
+      );
     }
 
-    if (reservation.isExpired) {
-      throw new InternalServerErrorException('Reservation is expired');
-    }
-
-    const updatedReservation = {
-      ...reservation,
-      paymentStatus: PAYMENT_STATUS.PAID,
-    };
-
-    await this.reservationManager.save(updatedReservation);
+    await this.seatManager.update(user.id, seatNumber, date);
 
     await this.userManager.save({ ...user, balance: user.balance - PRICE });
 
@@ -64,7 +60,6 @@ export class PaymentService {
       amount: PRICE,
       paymentDate: new Date().toISOString(),
       status: PAYMENT_STATUS.PAID,
-      reservationId,
     });
 
     await this.paymentManager.save(payment);

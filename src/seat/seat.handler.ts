@@ -3,6 +3,8 @@ import { DeepPartial, Repository } from 'typeorm';
 
 import { SeatEntity } from './struct/seat.entity';
 import { Seat } from './struct/seat.domain';
+import { DateEntity } from '../date/struct/date.entity';
+import { Date } from '../date/struct/date.domain';
 
 interface Query<T> {
   getAvailableSeatByDate(date: string): Promise<T[]>;
@@ -26,7 +28,6 @@ export class SeatReader implements Query<Seat> {
         dateAvailability: {
           date,
         },
-        isAvailable: true,
       },
       order: {
         seatNumber: 'ASC',
@@ -37,6 +38,7 @@ export class SeatReader implements Query<Seat> {
 
 interface Command<T> {
   save(user: T): Promise<T>;
+  update(userId: number, seatNumber: number, date: string);
 }
 export class SeatManager implements Command<Seat> {
   constructor(
@@ -46,5 +48,18 @@ export class SeatManager implements Command<Seat> {
 
   async save(seat: Seat): Promise<Seat> {
     return this.seatRepository.save(seat);
+  }
+
+  async update(userId: number, seatNumber: number, date: string) {
+    console.log(
+      await this.seatRepository.update(
+        { seatNumber, dateAvailability: { date } },
+        { userId },
+      ),
+    );
+    return this.seatRepository.update(
+      { seatNumber, dateAvailability: { date } },
+      { userId },
+    );
   }
 }

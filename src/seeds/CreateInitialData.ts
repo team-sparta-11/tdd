@@ -24,7 +24,6 @@ export default class CreateInitialData implements Seeder {
         const seatEntity = seatRepository.create({
           dateAvailability: dateEntity,
           seatNumber,
-          isAvailable: true,
         });
 
         await seatRepository.save(seatEntity);

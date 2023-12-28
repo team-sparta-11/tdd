@@ -20,7 +20,4 @@ export class SeatEntity extends BaseEntity {
 
   @Column()
   seatNumber: number;
-
-  @Column({ default: true })
-  isAvailable: boolean;
 }
