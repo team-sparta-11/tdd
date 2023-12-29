@@ -2,20 +2,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { DateEntity } from './struct/date.entity';
-import { Date } from './struct/date.domain';
 
-interface Query<T> {
-  getAvailableDates(): Promise<T[]>;
+interface Query {
+  getAvailableDates(): Promise<string[]>;
 }
 
-export class DateReader implements Query<Date> {
+export class DateReader implements Query {
   constructor(
     @InjectRepository(DateEntity)
     private readonly dateRepository: Repository<DateEntity>,
   ) {}
 
-  async getAvailableDates(): Promise<Date[]> {
-    return await this.dateRepository.find({
+  async getAvailableDates(): Promise<string[]> {
+    const dates = await this.dateRepository.find({
       relations: ['seatAvailability'],
       where: {
         seatAvailability: {
@@ -26,5 +25,7 @@ export class DateReader implements Query<Date> {
         date: 'ASC',
       },
     });
+
+    return dates.map((date) => date.date);
   }
 }

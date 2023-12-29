@@ -5,9 +5,7 @@ import { SeatReader } from './seat.handler';
 export class SeatService {
   constructor(private seatReader: SeatReader) {}
 
-  async getAvailableSeatsByDate(date: string): Promise<number[]> {
-    const seats = await this.seatReader.getAvailableSeatByDate(date);
-
-    return seats.map((seat) => seat.seatNumber);
+  getAvailableSeatsByDate(date: string): Promise<number[]> {
+    return this.seatReader.getAvailableSeatByDate(date);
   }
 }
