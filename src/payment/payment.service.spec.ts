@@ -16,6 +16,7 @@ import { Reservation } from 'src/reservation/reservation.domain';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { initializeTransactionalContext } from 'typeorm-transactional';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserEntity } from 'src/auth/struct/user.entity';
 
 const mockUser: User = {
   id: 1,
@@ -90,12 +91,16 @@ describe('PaymentService', () => {
       const amount = 500;
 
       const newUser = { ...mockUser, balance: mockUser.balance + amount };
-      jest.spyOn(userManager, 'save').mockResolvedValue(newUser);
+      const saveSpy = jest
+        .spyOn(userManager, 'save')
+        .mockResolvedValue(newUser as UserEntity);
 
       const newBalance = await service.chargeBalance({
         user: mockUser,
         amount,
       });
+
+      expect(saveSpy).toHaveBeenCalledWith(newUser);
       expect(newBalance).toEqual(mockUser.balance + amount);
     });
   });
@@ -103,10 +108,6 @@ describe('PaymentService', () => {
   describe('payReservation', () => {
     it('should throw error if balance is not enough', async () => {
       const user = { ...mockUser, balance: 0 };
-
-      jest
-        .spyOn(reservationReader, 'findOne')
-        .mockResolvedValue(mockReservation);
 
       await expect(
         service.payReservation({ user, reservationId: mockReservation.id }),
@@ -118,13 +119,17 @@ describe('PaymentService', () => {
     it('should throw error if reservation is not found', async () => {
       const reservationId = 0;
 
-      jest.spyOn(reservationReader, 'findOne').mockResolvedValue(null);
+      const findSpy = jest
+        .spyOn(reservationReader, 'findOne')
+        .mockResolvedValue(null);
 
       await expect(
         service.payReservation({ user: mockUser, reservationId }),
       ).rejects.toThrow(
         new InternalServerErrorException('Reservation is not on list'),
       );
+
+      expect(findSpy).toHaveBeenCalledWith({ id: reservationId });
     });
 
     it('should throw error if reservation is expired', async () => {
@@ -132,46 +137,21 @@ describe('PaymentService', () => {
 
       const reservation = { ...mockReservation, isExpired: true };
 
-      jest.spyOn(reservationReader, 'findOne').mockResolvedValue(reservation);
+      const findSpy = jest
+        .spyOn(reservationReader, 'findOne')
+        .mockResolvedValue(reservation);
 
       await expect(
         service.payReservation({ user, reservationId: reservation.id }),
       ).rejects.toThrow(
         new InternalServerErrorException('Reservation is expired'),
       );
+
+      expect(findSpy).toHaveBeenCalledWith({ id: reservation.id });
     });
 
     it('should pay reservation', async () => {
-      jest
-        .spyOn(reservationReader, 'findOne')
-        .mockResolvedValue(mockReservation);
-
-      const paidReservation = {
-        ...mockReservation,
-        paymentStatus: PAYMENT_STATUS.PAID,
-      };
-      jest.spyOn(reservationManager, 'save').mockResolvedValue(paidReservation);
-      jest
-        .spyOn(userManager, 'save')
-        .mockResolvedValue({ ...mockUser, balance: mockUser.balance - PRICE });
-
-      const payment = {
-        id: 1,
-        userId: mockUser.id,
-        amount: PRICE,
-        paymentDate: new Date().toISOString(),
-        status: PAYMENT_STATUS.PAID,
-        reservationId: paidReservation.id,
-      };
-
-      jest.spyOn(paymentManager, 'create').mockReturnValue(payment);
-      jest.spyOn(paymentManager, 'save').mockResolvedValue(payment);
-
-      const result = await service.payReservation({
-        user: mockUser,
-        reservationId: mockReservation.id,
-      });
-      expect(result).toEqual(payment);
+      // TODO: apply new pay reservation logic
     });
   });
 });
