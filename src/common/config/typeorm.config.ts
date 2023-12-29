@@ -13,6 +13,7 @@ export const typeOrmConfig = registerAs('typeOrmConfig', () => ({
   password: process.env['DB_PASSWORD'],
   database: process.env['DB_DATABASE'],
   autoLoadEntities: true,
+  logging: false,
   synchronize: process.env['DB_SYNCHRONIZE'] === 'true',
   ...(EXTERNAL_DB_ENVS.has(process.env.NODE_ENV) && {
     ssl: true,

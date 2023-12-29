@@ -17,9 +17,9 @@ export class WaitingScheduleService {
    * 2. get open count in task line
    *  - when not exists in task line, just return
    * 3. de-queue tokens from waiting queue
-   * 4. apply new score as just in case, then push to task line
+   * 4. apply new score for expired, then push to task line
    * */
-  @Cron('* * * * * *')
+  @Cron('0 * * * * *')
   async moveToTask() {
     // get how many task will run
     const moveCnt = this.config.get('appConfig')['maxTask'];

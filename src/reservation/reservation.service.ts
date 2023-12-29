@@ -1,14 +1,8 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { PAYMENT_STATUS } from 'src/common/types/reservation';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './struct/reservation.domain';
 import { RequestReservationDto } from './struct/request-reservation.dto';
-import { SeatManager, SeatReader } from 'src/seat/seat.handler';
-import { Transactional } from 'typeorm-transactional';
+import { SeatReader } from 'src/seat/seat.handler';
 
 @Injectable()
 export class ReservationService {
@@ -16,10 +10,8 @@ export class ReservationService {
     private readonly reservationManager: ReservationManager,
     private readonly reservationReader: ReservationReader,
     private readonly seatReader: SeatReader,
-    private readonly seatManager: SeatManager,
   ) {}
 
-  @Transactional()
   async requestReservation({
     requestReservationDto,
     userId,
@@ -29,19 +21,31 @@ export class ReservationService {
   }): Promise<Reservation> {
     const { seatNumber, date } = requestReservationDto;
 
-    const seat = await this.seatReader.getSeat({
+    // seat information
+    const seat = await this.seatReader.findOne({
       seatNumber,
-      dateAvailability: { date },
+      date,
     });
 
+    // reservation from memory database
     const exists = await this.reservationReader.findOne({ seatNumber, date });
 
-    if (!seat) throw new BadRequestException('There is no seat');
+    // When user already reservation or paid,
+    // just return already information
+    if (exists?.userId === userId || seat?.userId === userId)
+      return {
+        userId,
+        seatNumber,
+        date,
+      };
 
-    if (seat.userId || exists) {
-      throw new InternalServerErrorException('Seat is already reserved');
+    // When seat already has userId (=== paid on other user)
+    // throw
+    if (seat?.userId) {
+      throw new InternalServerErrorException('Seat is already taken');
     }
 
+    // reserve to memory database
     return await this.reservationManager.save({
       userId,
       seatNumber,

@@ -1,20 +1,11 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  BaseEntity,
-} from 'typeorm';
+import { Entity, OneToMany, BaseEntity, PrimaryColumn } from 'typeorm';
 import { SeatEntity } from '../../seat/struct/seat.entity';
 
 @Entity()
 export class DateEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+  @PrimaryColumn()
   date: string;
 
-  @OneToMany(() => SeatEntity, (seat) => seat.dateAvailability)
+  @OneToMany(() => SeatEntity, (seat) => seat.date)
   seatAvailability: SeatEntity[];
 }

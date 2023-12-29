@@ -1,9 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import {
-  ReservationManager,
-  ReservationReader,
-} from 'src/reservation/reservation.handler';
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
+import { PAYMENT_STATUS } from 'src/common/types/reservation';
+import { ReservationReader } from 'src/reservation/reservation.handler';
 import { UserManager } from 'src/auth/user.handler';
 import { PaymentManager } from './payment.handler';
 import { Transactional } from 'typeorm-transactional';
@@ -16,7 +17,6 @@ export const PRICE = 10000;
 export class PaymentService {
   constructor(
     private userManager: UserManager,
-    private reservationManager: ReservationManager,
     private reservationReader: ReservationReader,
     private paymentManager: PaymentManager,
     private seatManager: SeatManager,
@@ -37,22 +37,25 @@ export class PaymentService {
   @Transactional()
   async payReservation({ user, seatNumber, date }) {
     if (user.balance < PRICE) {
-      throw new InternalServerErrorException('Balance is not enough to pay');
+      throw new NotAcceptableException('Balance is not enough to pay');
     }
 
+    // find reservation from memory database
     const reservation = await this.reservationReader.findOne({
       seatNumber,
       date,
     });
 
-    if (!reservation) {
-      throw new InternalServerErrorException(
-        'Reservation is not on list or expired',
-      );
+    // check reservation owner
+    if (!reservation || reservation.userId !== user.id) {
+      throw new NotFoundException('Reservation is not on list or expired');
     }
 
+    // seat taken
     await this.seatManager.update(user.id, seatNumber, date);
 
+    // update balance
+    // TODO: is really ok, balance locate on user entity directly?
     await this.userManager.save({ ...user, balance: user.balance - PRICE });
 
     const payment = this.paymentManager.create({
@@ -62,9 +65,23 @@ export class PaymentService {
       status: PAYMENT_STATUS.PAID,
     });
 
-    await this.paymentManager.save(payment);
-
-    this.eventEmitter.emit('task.done', { token: user['statusToken'] });
+    // event for other persist
+    // - 1. task queue progress - memory db
+    // - 2. save payment history - rdb
+    // - 3. save reservation history - rdb
+    // listeners
+    // - in waiting module
+    // - in payment module
+    // - in reservation module
+    this.eventEmitter.emit('task.done', {
+      token: user['statusToken'],
+      payment,
+      reservation: {
+        userId: user.id,
+        date,
+        seatNumber,
+      },
+    });
 
     return payment;
   }

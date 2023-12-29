@@ -11,6 +11,7 @@ import { SeatService } from 'src/seat/seat.service';
 import { DateEntity } from 'src/date/struct/date.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
+import { ReservationListener } from './reservation.listener';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SeatManager, SeatReader } from 'src/seat/seat.handler';
     SeatService,
     ReservationManager,
     ReservationReader,
+    ReservationListener,
     SeatReader,
     SeatManager,
   ],

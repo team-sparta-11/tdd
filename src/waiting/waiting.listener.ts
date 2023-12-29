@@ -9,5 +9,7 @@ export class WaitingListener {
   @OnEvent('task.done')
   async handleTaskDone({ token }: { token: string }) {
     this.manager.deQueueFromTaskByToken(token);
+    const waiter = await this.manager.deQueueFromWaiting(1);
+    if (waiter) await this.manager.enQueueToTask(waiter[0]);
   }
 }

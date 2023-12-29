@@ -18,7 +18,7 @@ import {
 } from 'src/reservation/reservation.handler';
 import { PaymentManager } from './payment.handler';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PaymentListener } from './payment.listener';
 
 @Module({
   imports: [
@@ -32,7 +32,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
     ]),
   ],
   providers: [
-    EventEmitter2,
     PaymentService,
     AuthService,
     ReservationService,
@@ -43,6 +42,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
     PaymentManager,
     SeatReader,
     SeatManager,
+    PaymentListener,
   ],
   controllers: [PaymentController],
 })

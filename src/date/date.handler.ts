@@ -18,9 +18,9 @@ export class DateReader implements Query<Date> {
     return await this.dateRepository.find({
       relations: ['seatAvailability'],
       where: {
-        // seatAvailability: {
-        //
-        // },
+        seatAvailability: {
+          userId: null,
+        },
       },
       order: {
         date: 'ASC',
