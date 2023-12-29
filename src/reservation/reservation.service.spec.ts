@@ -56,6 +56,10 @@ describe('ReservationService', () => {
     seatReader = module.get<SeatReader>(SeatReader);
   });
 
+  it('should be defined', () => {
+    expect(reservationService).toBeDefined();
+  });
+
   it('should throw BadRequestException if there is no seat', async () => {
     const wrongRequestReservationDto = {
       seatNumber: 0,
