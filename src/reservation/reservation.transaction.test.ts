@@ -61,19 +61,19 @@ describe('reservation transaction', () => {
     };
 
     await Promise.all([
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 1,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 2,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 3,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 4,
         requestReservationDto: requestReservationDto,
       }),
@@ -90,19 +90,19 @@ describe('reservation transaction', () => {
     };
 
     await Promise.all([
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 1,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 2,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 3,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 4,
         requestReservationDto: requestReservationDto,
       }),
@@ -125,19 +125,19 @@ describe('reservation transaction', () => {
     };
 
     await Promise.all([
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 1,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 2,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 3,
         requestReservationDto: requestReservationDto,
       }),
-      service.experimentalRequestReservation({
+      service.requestReservation({
         userId: 4,
         requestReservationDto: requestReservationDto,
       }),
