@@ -1,4 +1,4 @@
-import { PAYMENT_STATUS } from 'src/common/types/reservation';
+import { PAYMENT_STATUS } from '../../common/types/reservation';
 import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -17,7 +17,4 @@ export class PaymentEntity extends BaseEntity {
 
   @Column()
   status: PAYMENT_STATUS;
-
-  @Column()
-  reservationId: number;
 }

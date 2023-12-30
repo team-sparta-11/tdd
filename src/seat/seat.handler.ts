@@ -5,8 +5,8 @@ import { SeatEntity } from './struct/seat.entity';
 import { Seat } from './struct/seat.domain';
 
 interface Query<T> {
-  getSeat(seatInfo: DeepPartial<T>): Promise<T>;
   getAvailableSeatByDate(date: string): Promise<number[]>;
+  findOne(seatInfo: DeepPartial<T>): Promise<T>;
 }
 
 export class SeatReader implements Query<Seat> {
@@ -15,18 +15,16 @@ export class SeatReader implements Query<Seat> {
     private readonly seatRepository: Repository<SeatEntity>,
   ) {}
 
-  getSeat(seatInfo: DeepPartial<Seat>): Promise<Seat> {
-    return this.seatRepository.findOne({ where: seatInfo });
+  findOne(seatInfo: DeepPartial<Seat>): Promise<Seat> {
+    return this.seatRepository.findOneOrFail({ where: seatInfo });
   }
 
   async getAvailableSeatByDate(date: string): Promise<number[]> {
     const seats = await this.seatRepository.find({
-      relations: ['dateAvailability'],
+      relations: ['date'],
       where: {
-        dateAvailability: {
-          date,
-        },
-        isAvailable: true,
+        date: date,
+        userId: null,
       },
       order: {
         seatNumber: 'ASC',
@@ -39,6 +37,7 @@ export class SeatReader implements Query<Seat> {
 
 interface Command<T> {
   save(user: T): Promise<T>;
+  update(userId: number, seatNumber: number, date: string): Promise<unknown>;
 }
 export class SeatManager implements Command<Seat> {
   constructor(
@@ -48,5 +47,9 @@ export class SeatManager implements Command<Seat> {
 
   async save(seat: Seat): Promise<Seat> {
     return this.seatRepository.save(seat);
+  }
+
+  async update(userId: number, seatNumber: number, date: string) {
+    return this.seatRepository.update({ seatNumber, date: date }, { userId });
   }
 }

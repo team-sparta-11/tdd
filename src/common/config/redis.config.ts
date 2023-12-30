@@ -14,5 +14,11 @@ export const redisConfig = registerAs('redisConfig', () => ({
       port: process.env['REDIS_PORT'],
       // password: 'redisPw'
     },
+    {
+      namespace: 'reservation',
+      host: '127.0.0.1',
+      port: process.env['REDIS_PORT'],
+      // password: 'redisPw'
+    },
   ],
 }));

@@ -12,7 +12,7 @@ export class AuthController {
   @Post('/signup')
   signUp(
     @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
-  ): Promise<User> {
+  ): Promise<Omit<User, 'password'>> {
     return this.authService.createUser(authCredentialsDto);
   }
 

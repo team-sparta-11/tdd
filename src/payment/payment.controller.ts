@@ -10,8 +10,9 @@ import { PaymentService } from './payment.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/common/decorator/get-user.decorator';
 import { UserEntity } from 'src/auth/struct/user.entity';
-import { Payment } from './payment.domain';
+import { Payment } from './struct/payment.domain';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { RequestReservationDto } from '../reservation/struct/request-reservation.dto';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -40,17 +41,10 @@ export class PaymentController {
   }
 
   @Post('/reservation')
-  @ApiBody({
-    schema: {
-      properties: {
-        reservationId: { type: 'number', required: ['true'], default: 1 },
-      },
-    },
-  })
   payReservation(
     @GetUser() user: UserEntity & { statusToken: string },
-    @Body('reservationId', ParseIntPipe) reservationId: number,
+    @Body() dto: RequestReservationDto,
   ): Promise<Payment> {
-    return this.paymentService.payReservation({ user, reservationId });
+    return this.paymentService.payReservation({ user, ...dto });
   }
 }

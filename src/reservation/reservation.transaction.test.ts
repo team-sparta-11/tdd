@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeatEntity } from 'src/seat/struct/seat.entity';
-import { ReservationEntity } from './reservation.entity';
+import { ReservationEntity } from './struct/reservation.entity';
 import { ReservationService } from './reservation.service';
 import { typeORMAsyncConfig } from 'src/common/config/typeorm.config';
 import { ReservationModule } from './reservation.module';

@@ -5,12 +5,13 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { jwtConfig } from 'src/common/config/jwt.config';
-import { ReservationEntity } from './reservation.entity';
+import { ReservationEntity } from './struct/reservation.entity';
 import { SeatEntity } from 'src/seat/struct/seat.entity';
 import { SeatService } from 'src/seat/seat.service';
 import { DateEntity } from 'src/date/struct/date.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
+import { ReservationListener } from './reservation.listener';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SeatManager, SeatReader } from 'src/seat/seat.handler';
     SeatService,
     ReservationManager,
     ReservationReader,
+    ReservationListener,
     SeatReader,
     SeatManager,
   ],

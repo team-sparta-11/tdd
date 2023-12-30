@@ -22,9 +22,8 @@ export default class CreateInitialData implements Seeder {
       for (let seatNumber = 1; seatNumber <= 50; seatNumber++) {
         const seatRepository = dataSource.getRepository(SeatEntity);
         const seatEntity = seatRepository.create({
-          dateAvailability: dateEntity,
+          date: dateEntity.date,
           seatNumber,
-          isAvailable: true,
         });
 
         await seatRepository.save(seatEntity);

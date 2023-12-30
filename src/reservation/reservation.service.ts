@@ -6,15 +6,13 @@ import {
 import { DataSource } from 'typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { ReservationManager, ReservationReader } from './reservation.handler';
-import { Reservation } from './reservation.domain';
-import { RequestReservationDto } from './dto/request-reservation.dto';
+import { Reservation } from './struct/reservation.domain';
+import { RequestReservationDto } from './struct/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { Propagation, Transactional } from 'typeorm-transactional';
 import { Seat } from 'src/seat/struct/seat.domain';
 import { SeatEntity } from 'src/seat/struct/seat.entity';
-import { ReservationEntity } from 'src/reservation/reservation.entity';
-
-const FIVE_MINUTES = 5 * 60 * 1000;
+import { ReservationEntity } from 'src/reservation/struct/reservation.entity';
 
 @Injectable()
 export class ReservationService {
@@ -27,7 +25,6 @@ export class ReservationService {
     private readonly dataSource: DataSource,
   ) {}
 
-  @Transactional()
   async requestReservation({
     requestReservationDto,
     userId,
@@ -37,56 +34,35 @@ export class ReservationService {
   }): Promise<Reservation> {
     const { seatNumber, date } = requestReservationDto;
 
-    const seat = await this.seatReader.getSeat({
+    // seat information
+    const seat = await this.seatReader.findOne({
       seatNumber,
-      dateAvailability: { date },
+      date,
     });
 
-    if (!seat) throw new BadRequestException('There is no seat');
+    // reservation from memory database
+    const exists = await this.reservationReader.findOne({ seatNumber, date });
 
-    if (!seat.isAvailable) {
-      throw new InternalServerErrorException('Seat is already reserved');
+    // When user already reservation or paid,
+    // just return already information
+    if (exists?.userId === userId || seat?.userId === userId)
+      return {
+        userId,
+        seatNumber,
+        date,
+      };
+
+    // When seat already has userId (=== paid on other user)
+    // throw
+    if (seat?.userId) {
+      throw new InternalServerErrorException('Seat is already taken');
     }
 
-    await this.seatManager.save({ ...seat, userId, isAvailable: false });
-
-    const reservation = this.reservationManager.create({
+    // reserve to memory database
+    return await this.reservationManager.save({
       userId,
       seatNumber,
       date,
-      paymentStatus: PAYMENT_STATUS.UNPAID,
-      isExpired: false,
-    });
-
-    await this.reservationManager.save(reservation);
-
-    // TODO: add schedule job after 5min
-
-    return reservation;
-  }
-
-  // TODO: delete Transactional decorator if e2e module issue is not fixed
-  @Transactional({ propagation: Propagation.REQUIRES_NEW })
-  async batchAfterReservation({
-    seat,
-    reservation,
-  }: {
-    seat: Seat;
-    reservation: Reservation;
-  }) {
-    const afterReservation = await this.reservationReader.findOne(reservation);
-
-    if (afterReservation.paymentStatus === PAYMENT_STATUS.UNPAID) {
-      await this.seatManager.save({
-        ...seat,
-        userId: null,
-        isAvailable: true,
-      });
-    }
-
-    await this.reservationManager.save({
-      ...reservation,
-      isExpired: true,
     });
   }
 
@@ -105,35 +81,6 @@ export class ReservationService {
     try {
       await queryRunner.connect();
       await queryRunner.startTransaction('SERIALIZABLE');
-
-      const manager = queryRunner.manager;
-
-      const seat = await manager.findOne(SeatEntity, {
-        where: {
-          seatNumber,
-          dateAvailability: { date },
-        },
-      });
-
-      if (!seat) {
-        throw new BadRequestException('There is no seat');
-      }
-
-      if (!seat.isAvailable) {
-        throw new InternalServerErrorException('Seat is already reserved');
-      }
-
-      await manager.save(SeatEntity, { ...seat, userId, isAvailable: false });
-
-      const reservation = manager.create(ReservationEntity, {
-        userId,
-        seatNumber,
-        date,
-        paymentStatus: PAYMENT_STATUS.UNPAID,
-        isExpired: false,
-      });
-
-      await manager.save(ReservationEntity, reservation);
 
       return await queryRunner.commitTransaction();
     } catch (err) {

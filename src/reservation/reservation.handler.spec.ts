@@ -1,6 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { Repository } from 'typeorm';
-import { ReservationEntity } from './reservation.entity';
+import { ReservationEntity } from './struct/reservation.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';

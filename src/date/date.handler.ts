@@ -18,7 +18,7 @@ export class DateReader implements Query {
       relations: ['seatAvailability'],
       where: {
         seatAvailability: {
-          isAvailable: true,
+          userId: null,
         },
       },
       order: {
