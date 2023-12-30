@@ -3,13 +3,8 @@ import { AppModule } from './app.module';
 import swaggerConfig from './common/config/swagger.config';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import {
-  StorageDriver,
-  initializeTransactionalContext,
-} from 'typeorm-transactional';
 
 async function bootstrap() {
-  initializeTransactionalContext({ storageDriver: StorageDriver.AUTO });
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));

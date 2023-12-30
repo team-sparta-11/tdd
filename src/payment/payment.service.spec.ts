@@ -14,7 +14,6 @@ import { User } from 'src/auth/struct/user.domain';
 import { Reservation } from 'src/reservation/struct/reservation.domain';
 
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
-import { initializeTransactionalContext } from 'typeorm-transactional';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserEntity } from 'src/auth/struct/user.entity';
 
@@ -42,7 +41,6 @@ describe('PaymentService', () => {
   let paymentManager: PaymentManager;
 
   beforeEach(async () => {
-    initializeTransactionalContext();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PaymentService,

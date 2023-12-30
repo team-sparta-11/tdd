@@ -1,7 +1,5 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSource, DataSourceOptions } from 'typeorm';
-import { addTransactionalDataSource } from 'typeorm-transactional';
 
 const EXTERNAL_DB_ENVS = new Set(['production']);
 
@@ -46,18 +44,5 @@ export const typeOrmConfig = registerAs('typeOrmConfig', () => {
 export const typeORMAsyncConfig = {
   useFactory: (): TypeOrmModuleOptions => {
     return typeOrmConfig() as TypeOrmModuleOptions;
-  },
-
-  async dataSourceFactory(options: DataSourceOptions) {
-    if (!options) {
-      throw new Error('Invalid options passed');
-    }
-
-    // @TODO: `addTransactionalDataSource` not work with testcontainers, fix it
-    if (ENV_ITG) {
-      return new DataSource(options);
-    }
-
-    return addTransactionalDataSource(new DataSource(options));
   },
 };
