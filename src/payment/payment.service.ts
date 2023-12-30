@@ -7,7 +7,6 @@ import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { ReservationReader } from 'src/reservation/reservation.handler';
 import { UserManager } from 'src/auth/user.handler';
 import { PaymentManager } from './payment.handler';
-import { Transactional } from 'typeorm-transactional';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SeatManager } from '../seat/seat.handler';
 import { DataSource } from 'typeorm';
@@ -36,7 +35,6 @@ export class PaymentService {
     return newUser.balance;
   }
 
-  @Transactional()
   async payReservation({ user, seatNumber, date }) {
     if (user.balance < PRICE) {
       throw new NotAcceptableException('Balance is not enough to pay');
