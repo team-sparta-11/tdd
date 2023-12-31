@@ -1,8 +1,9 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Repository } from 'typeorm';
+import { DeepPartial, EntityNotFoundError, Repository } from 'typeorm';
 
 import { SeatEntity } from './struct/seat.entity';
 import { Seat } from './struct/seat.domain';
+import { NotFoundException } from '@nestjs/common';
 
 interface Query<T> {
   getAvailableSeatByDate(date: string): Promise<number[]>;
@@ -15,8 +16,17 @@ export class SeatReader implements Query<Seat> {
     private readonly seatRepository: Repository<SeatEntity>,
   ) {}
 
-  findOne(seatInfo: DeepPartial<Seat>): Promise<Seat> {
-    return this.seatRepository.findOneOrFail({ where: seatInfo });
+  async findOne(seatInfo: DeepPartial<Seat>): Promise<Seat> {
+    // TODO: extract to catch filter(APO)
+    try {
+      return await this.seatRepository.findOneOrFail({ where: seatInfo });
+    } catch (e) {
+      if (e instanceof EntityNotFoundError) {
+        throw new NotFoundException('NotMatchSeatExists');
+      } else {
+        throw e;
+      }
+    }
   }
 
   async getAvailableSeatByDate(date: string): Promise<number[]> {
