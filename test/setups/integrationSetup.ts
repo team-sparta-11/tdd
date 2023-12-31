@@ -22,6 +22,7 @@ export const setupTestPostgres = async (): Promise<TestContainerData> => {
       POSTGRES_PASSWORD: PG_PASSWORD,
     })
     .withReuse()
+    .withNetworkMode('bridge')
     .start();
 
   const port = container.getMappedPort(PG_PORT);
@@ -39,6 +40,7 @@ export const setupTestRedis = async (): Promise<TestContainerData> => {
   const container = await new GenericContainer(REDIS_IMAGE)
     .withExposedPorts(REDIS_PORT)
     .withReuse()
+    .withNetworkMode('bridge')
     .start();
 
   const port = container.getMappedPort(REDIS_PORT);
