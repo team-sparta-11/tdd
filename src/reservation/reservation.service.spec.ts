@@ -2,12 +2,13 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { ReservationService } from './reservation.service';
 import { ReservationManager, ReservationReader } from './reservation.handler';
-import { RequestReservationDto } from './dto/request-reservation.dto';
+import { RequestReservationDto } from './struct/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { Seat } from 'src/seat/struct/seat.domain';
 import {
   BadRequestException,
-  InternalServerErrorException,
+  NotAcceptableException,
+  NotFoundException,
 } from '@nestjs/common';
 
 describe('ReservationService', () => {
@@ -40,7 +41,7 @@ describe('ReservationService', () => {
         {
           provide: SeatReader,
           useValue: {
-            getSeat: jest.fn(),
+            findOne: jest.fn(),
           },
         },
         {
@@ -66,19 +67,21 @@ describe('ReservationService', () => {
       date: '2024-01-01',
     };
     const getSeatSpy = jest
-      .spyOn(seatReader, 'getSeat')
-      .mockResolvedValue(undefined);
+      .spyOn(seatReader, 'findOne')
+      .mockImplementationOnce(() => {
+        throw new NotFoundException();
+      });
 
     await expect(
       reservationService.requestReservation({
         requestReservationDto: wrongRequestReservationDto,
         userId: 1,
       }),
-    ).rejects.toThrow(new BadRequestException('There is no seat'));
+    ).rejects.toThrow(new NotFoundException());
 
     expect(getSeatSpy).toHaveBeenCalledWith({
       seatNumber: wrongRequestReservationDto.seatNumber,
-      dateAvailability: { date: wrongRequestReservationDto.date },
+      date: wrongRequestReservationDto.date,
     });
   });
 
@@ -90,13 +93,13 @@ describe('ReservationService', () => {
 
     const seat: Seat = {
       id: 1,
-      userId: 1,
+      userId: 2,
       seatNumber: 1,
-      isAvailable: false,
+      date: '2024-01-01',
     };
 
     const getSeatSpy = jest
-      .spyOn(seatReader, 'getSeat')
+      .spyOn(seatReader, 'findOne')
       .mockResolvedValue(seat);
 
     await expect(
@@ -104,13 +107,11 @@ describe('ReservationService', () => {
         requestReservationDto,
         userId: 1,
       }),
-    ).rejects.toThrow(
-      new InternalServerErrorException('Seat is already reserved'),
-    );
+    ).rejects.toThrow(new NotAcceptableException('Seat is already taken'));
 
     expect(getSeatSpy).toHaveBeenCalledWith({
       seatNumber: requestReservationDto.seatNumber,
-      dateAvailability: { date: requestReservationDto.date },
+      date: requestReservationDto.date,
     });
   });
 });

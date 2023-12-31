@@ -30,21 +30,22 @@ describe('SeatReader and SeatManager', () => {
 
   const mockSeatInfo = {
     seatNumber: 1,
-    dateAvailability: { date: '2024-01-01' },
+    date: '2024-01-01',
   };
+
   const mockSeat = {
     id: 1,
     seatNumber: 1,
     userId: null,
-    isAvailable: true,
+    date: '2024-01-01',
   };
 
   it('should find a seat by seatInfo', async () => {
     const findSpy = jest
-      .spyOn(seatRepository, 'findOne')
+      .spyOn(seatRepository, 'findOneOrFail')
       .mockResolvedValue(mockSeat as SeatEntity);
 
-    const result = await seatReader.getSeat(mockSeatInfo);
+    const result = await seatReader.findOne(mockSeatInfo);
 
     expect(findSpy).toHaveBeenCalledWith({
       where: mockSeatInfo,
@@ -63,12 +64,10 @@ describe('SeatReader and SeatManager', () => {
     const result = await seatReader.getAvailableSeatByDate(mockDate);
 
     expect(findSpy).toHaveBeenCalledWith({
-      relations: ['dateAvailability'],
+      relations: ['date'],
       where: {
-        dateAvailability: {
-          date: mockDate,
-        },
-        isAvailable: true,
+        date: mockDate,
+        userId: null,
       },
       order: {
         seatNumber: 'ASC',
@@ -83,7 +82,6 @@ describe('SeatReader and SeatManager', () => {
     const mockSavedSeat = {
       ...mockSeat,
       userId: 1,
-      isAvailable: false,
     };
 
     const saveSpy = jest

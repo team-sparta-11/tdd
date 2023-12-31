@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { InternalServerErrorException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 
 import { PRICE, PaymentService } from './payment.service';
 
@@ -13,9 +16,10 @@ import { PaymentManager } from './payment.handler';
 import { User } from 'src/auth/struct/user.domain';
 import { Reservation } from 'src/reservation/struct/reservation.domain';
 
-import { PAYMENT_STATUS } from 'src/common/types/reservation';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserEntity } from 'src/auth/struct/user.entity';
+import { createMock } from '@golevelup/ts-jest';
+import { SeatManager } from '../seat/seat.handler';
 
 const mockUser: User = {
   id: 1,
@@ -25,20 +29,15 @@ const mockUser: User = {
 };
 
 const mockReservation: Reservation = {
-  id: 1,
   userId: mockUser.id,
   date: '2023-03-01',
   seatNumber: 1,
-  isExpired: false,
-  paymentStatus: PAYMENT_STATUS.UNPAID,
 };
 
 describe('PaymentService', () => {
   let service: PaymentService;
   let userManager: UserManager;
-  let reservationManager: ReservationManager;
   let reservationReader: ReservationReader;
-  let paymentManager: PaymentManager;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -69,15 +68,21 @@ describe('PaymentService', () => {
             save: jest.fn(),
           },
         },
+        {
+          provide: SeatManager,
+          useValue: {
+            update: jest.fn(),
+          },
+        },
         EventEmitter2,
       ],
-    }).compile();
+    })
+      .useMocker(createMock)
+      .compile();
 
     service = module.get<PaymentService>(PaymentService);
     userManager = module.get<UserManager>(UserManager);
-    reservationManager = module.get<ReservationManager>(ReservationManager);
     reservationReader = module.get<ReservationReader>(ReservationReader);
-    paymentManager = module.get<PaymentManager>(PaymentManager);
   });
 
   it('should be defined', () => {
@@ -108,44 +113,37 @@ describe('PaymentService', () => {
       const user = { ...mockUser, balance: 0 };
 
       await expect(
-        service.payReservation({ user, reservationId: mockReservation.id }),
+        service.payReservation({
+          user,
+          seatNumber: mockReservation.seatNumber,
+          date: mockReservation.date,
+        }),
       ).rejects.toThrow(
         new InternalServerErrorException('Balance is not enough to pay'),
       );
     });
 
-    it('should throw error if reservation is not found', async () => {
-      const reservationId = 0;
+    it('should throw error if reservation is expired or not reserved', async () => {
+      const user = { ...mockUser, balance: PRICE };
 
       const findSpy = jest
         .spyOn(reservationReader, 'findOne')
         .mockResolvedValue(null);
 
       await expect(
-        service.payReservation({ user: mockUser, reservationId }),
+        service.payReservation({
+          user,
+          seatNumber: mockReservation.seatNumber,
+          date: mockReservation.date,
+        }),
       ).rejects.toThrow(
-        new InternalServerErrorException('Reservation is not on list'),
+        new NotFoundException('Reservation is not on list or expired'),
       );
 
-      expect(findSpy).toHaveBeenCalledWith({ id: reservationId });
-    });
-
-    it('should throw error if reservation is expired', async () => {
-      const user = { ...mockUser, balance: PRICE };
-
-      const reservation = { ...mockReservation, isExpired: true };
-
-      const findSpy = jest
-        .spyOn(reservationReader, 'findOne')
-        .mockResolvedValue(reservation);
-
-      await expect(
-        service.payReservation({ user, reservationId: reservation.id }),
-      ).rejects.toThrow(
-        new InternalServerErrorException('Reservation is expired'),
-      );
-
-      expect(findSpy).toHaveBeenCalledWith({ id: reservation.id });
+      expect(findSpy).toHaveBeenCalledWith({
+        seatNumber: mockReservation.seatNumber,
+        date: mockReservation.date,
+      });
     });
 
     it('should pay reservation', async () => {
