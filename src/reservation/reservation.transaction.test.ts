@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeatEntity } from 'src/seat/struct/seat.entity';
 import { ReservationEntity } from './struct/reservation.entity';
@@ -19,13 +19,15 @@ const date = '2024-01-01';
 const seatNumber = 1;
 
 describe('reservation transaction', () => {
+  let module: TestingModule;
+
   let service: ReservationService;
 
   let em: EntityManager;
   let rc: RedisClientService;
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot(configModuleOption),
         TypeOrmModule.forFeature([SeatEntity, ReservationEntity]),
@@ -60,6 +62,8 @@ describe('reservation transaction', () => {
     await em.delete(SeatEntity, {});
     await em.delete(DateEntity, {});
     await em.delete(ReservationEntity, {});
+
+    await module.close();
   });
 
   it('Should reserve a one user when multiple users reservate same seat', async () => {
