@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { ReservationService } from './reservation.service';
 import { ReservationManager, ReservationReader } from './reservation.handler';
-import { RequestReservationDto } from './dto/request-reservation.dto';
+import { RequestReservationDto } from './struct/request-reservation.dto';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { Seat } from 'src/seat/struct/seat.domain';
 import {
@@ -40,7 +40,7 @@ describe('ReservationService', () => {
         {
           provide: SeatReader,
           useValue: {
-            getSeat: jest.fn(),
+            findOne: jest.fn(),
           },
         },
         {
@@ -60,28 +60,6 @@ describe('ReservationService', () => {
     expect(reservationService).toBeDefined();
   });
 
-  it('should throw BadRequestException if there is no seat', async () => {
-    const wrongRequestReservationDto = {
-      seatNumber: 0,
-      date: '2024-01-01',
-    };
-    const getSeatSpy = jest
-      .spyOn(seatReader, 'getSeat')
-      .mockResolvedValue(undefined);
-
-    await expect(
-      reservationService.requestReservation({
-        requestReservationDto: wrongRequestReservationDto,
-        userId: 1,
-      }),
-    ).rejects.toThrow(new BadRequestException('There is no seat'));
-
-    expect(getSeatSpy).toHaveBeenCalledWith({
-      seatNumber: wrongRequestReservationDto.seatNumber,
-      dateAvailability: { date: wrongRequestReservationDto.date },
-    });
-  });
-
   it('should throw InternalServerErrorException if seat is not available', async () => {
     const requestReservationDto: RequestReservationDto = {
       seatNumber: 1,
@@ -92,11 +70,11 @@ describe('ReservationService', () => {
       id: 1,
       userId: 1,
       seatNumber: 1,
-      isAvailable: false,
+      date: '2024-01-01',
     };
 
     const getSeatSpy = jest
-      .spyOn(seatReader, 'getSeat')
+      .spyOn(seatReader, 'findOne')
       .mockResolvedValue(seat);
 
     await expect(

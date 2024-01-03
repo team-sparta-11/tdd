@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentManager } from './payment.handler';
-import { PaymentEntity } from './payment.entity';
+import { PaymentEntity } from './struct/payment.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
@@ -31,7 +31,6 @@ describe('PaymentManager', () => {
     amount: 10000,
     paymentDate: '2024-01-01',
     status: PAYMENT_STATUS.UNPAID,
-    reservationId: 1,
   };
 
   it('should create a payment', async () => {
