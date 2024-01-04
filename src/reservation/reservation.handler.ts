@@ -4,7 +4,7 @@ import { ReservationEntity } from './struct/reservation.entity';
 import { Reservation } from './struct/reservation.domain';
 import { RedisClientService } from '../common/redis/redis.client-service';
 import { plainToInstance } from 'class-transformer';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 
 const FIVE_MINUTES = 5 * 60;
 
@@ -29,19 +29,22 @@ export class ReservationManager implements Command<Reservation> {
   ) {}
 
   async save(reservation: DeepPartial<Reservation>): Promise<Reservation> {
-    // return this.reservationRepository.save(reservation);
-    this.redis.reservation.set(
-      `reservation:${reservation.date}:${reservation.seatNumber}`,
-      JSON.stringify(reservation),
-    );
+    const key = `reservation:${reservation.date}:${reservation.seatNumber}`;
 
-    // save reservation with expired time.
-    // thx to this function,
-    // we don't need schedule for expired unpaid reservation
-    this.redis.reservation.expire(
-      `reservation:${reservation.date}:${reservation.seatNumber}`,
-      FIVE_MINUTES,
-    );
+    await this.redis.reservation
+      // start redis transaction
+      .multi()
+      // EX mean expire second
+      // NX mean not updatable
+      .set(key, JSON.stringify(reservation), 'EX', FIVE_MINUTES, 'NX')
+      .exec();
+
+    // if date-seat has already in redis, not changed.
+    // else, new insert has made just before.
+    // check user id and throw again.
+    const result = JSON.parse(await this.redis.reservation.get(key));
+    if (result['userId'] !== reservation.userId)
+      throw new NotAcceptableException('Seat is already taken');
 
     return reservation as Promise<Reservation>;
   }
@@ -64,12 +67,11 @@ export class ReservationReader implements Query<Reservation> {
   async findOne(
     reservation: DeepPartial<Reservation>,
   ): Promise<Reservation | undefined> {
-    const json = JSON.parse(
-      await this.redis.reservation.get(
-        `reservation:${reservation.date}:${reservation.seatNumber}`,
-      ),
-    );
+    const key = `reservation:${reservation.date}:${reservation.seatNumber}`;
 
-    return plainToInstance(ReservationEntity, json) as unknown as Reservation;
+    return plainToInstance(
+      ReservationEntity,
+      JSON.parse(await this.redis.reservation.get(key)),
+    ) as unknown as Reservation;
   }
 }

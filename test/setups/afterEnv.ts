@@ -8,6 +8,7 @@ if (process.env.NODE_ENV === 'itg') {
     global.testRedisContainer = redisContainer;
 
     global.testPgPort = pgPort;
+    global.testRedisHost = redisContainer.getHost();
     global.testRedisPort = redisPort;
   });
 

@@ -1,5 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { Reservation } from './struct/reservation.domain';
 import { RequestReservationDto } from './struct/request-reservation.dto';
@@ -11,7 +10,6 @@ export class ReservationService {
     private readonly reservationManager: ReservationManager,
     private readonly reservationReader: ReservationReader,
     private readonly seatReader: SeatReader,
-    private readonly dataSource: DataSource,
   ) {}
 
   async requestReservation({
@@ -23,50 +21,39 @@ export class ReservationService {
   }): Promise<Reservation> {
     const { seatNumber, date } = requestReservationDto;
 
-    const queryRunner = this.dataSource.createQueryRunner();
+    // seat information
+    const seat = await this.seatReader.findOne({
+      seatNumber,
+      date,
+    });
 
-    try {
-      await queryRunner.connect();
-      await queryRunner.startTransaction('SERIALIZABLE');
+    // reservation from memory database
+    const exists = await this.reservationReader.findOne({
+      seatNumber,
+      date,
+      userId,
+    });
 
-      // seat information
-      const seat = await this.seatReader.findOne({
-        seatNumber,
-        date,
-      });
-
-      // reservation from memory database
-      const exists = await this.reservationReader.findOne({ seatNumber, date });
-
-      // When user already reservation or paid,
-      // just return already information
-      if (exists?.userId === userId || seat?.userId === userId)
-        return {
-          userId,
-          seatNumber,
-          date,
-        };
-
-      // When seat already has userId (=== paid on other user)
-      // throw
-      if (seat?.userId) {
-        throw new InternalServerErrorException('Seat is already taken');
-      }
-
-      // reserve to memory database
-      const reservation = await this.reservationManager.save({
+    // When user already reservation or paid,
+    // just return already information
+    if (exists?.userId === userId || seat?.userId === userId)
+      return {
         userId,
         seatNumber,
         date,
-      });
+      };
 
-      await queryRunner.commitTransaction();
-
-      return reservation;
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-    } finally {
-      await queryRunner.release();
+    // When seat already has userId (=== paid on other user)
+    // throw
+    if (seat?.userId) {
+      throw new NotAcceptableException('Seat is already taken');
     }
+
+    // reserve to memory database
+    return await this.reservationManager.save({
+      userId,
+      seatNumber,
+      date,
+    });
   }
 }

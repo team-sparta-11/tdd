@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeatEntity } from 'src/seat/struct/seat.entity';
 import { ReservationEntity } from './struct/reservation.entity';
@@ -9,21 +9,30 @@ import { ReservationManager, ReservationReader } from './reservation.handler';
 import { SeatManager, SeatReader } from 'src/seat/seat.handler';
 import { EntityManager } from 'typeorm';
 import { DateEntity } from 'src/date/struct/date.entity';
+import { RedisClientModule } from '../common/redis/redis.client-module';
+import { ConfigModule } from '@nestjs/config';
+import { configModuleOption } from '../common/config/app.config';
+import { RedisClientService } from '../common/redis/redis.client-service';
+import { NotAcceptableException, NotFoundException } from '@nestjs/common';
 
 const date = '2024-01-01';
 const seatNumber = 1;
 
 describe('reservation transaction', () => {
+  let module: TestingModule;
+
   let service: ReservationService;
-  let dateResult: DateEntity;
 
   let em: EntityManager;
+  let rc: RedisClientService;
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       imports: [
+        ConfigModule.forRoot(configModuleOption),
         TypeOrmModule.forFeature([SeatEntity, ReservationEntity]),
         TypeOrmModule.forRootAsync(typeORMAsyncConfig),
+        RedisClientModule,
         ReservationModule,
       ],
       providers: [
@@ -37,14 +46,15 @@ describe('reservation transaction', () => {
 
     service = module.get(ReservationService);
     em = module.get(EntityManager);
+    rc = module.get(RedisClientService);
 
-    dateResult = await em.save(DateEntity, {
+    await em.save(DateEntity, {
       date,
     });
+
     await em.save(SeatEntity, {
       seatNumber,
-      isAvailable: true,
-      dateAvailability: dateResult,
+      date,
     });
   });
 
@@ -52,6 +62,8 @@ describe('reservation transaction', () => {
     await em.delete(SeatEntity, {});
     await em.delete(DateEntity, {});
     await em.delete(ReservationEntity, {});
+
+    await module.close();
   });
 
   it('Should reserve a one user when multiple users reservate same seat', async () => {
@@ -60,27 +72,34 @@ describe('reservation transaction', () => {
       seatNumber,
     };
 
-    await Promise.all([
-      service.requestReservation({
-        userId: 1,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 2,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 3,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 4,
-        requestReservationDto: requestReservationDto,
-      }),
-    ]);
+    await expect(async () => {
+      await Promise.all([
+        service.requestReservation({
+          userId: 1,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 2,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 3,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 4,
+          requestReservationDto: requestReservationDto,
+        }),
+      ]);
+    }).rejects.toThrow(new NotAcceptableException('Seat is already taken'));
 
-    const res = await em.find(ReservationEntity);
-    expect(res.length).toEqual(1);
+    const res = JSON.parse(
+      await rc.reservation.get(
+        `reservation:${requestReservationDto.date}:${requestReservationDto.seatNumber}`,
+      ),
+    );
+
+    expect(res.userId).toEqual(1);
   });
 
   it('Should not reserved when seat is not exist', async () => {
@@ -89,61 +108,80 @@ describe('reservation transaction', () => {
       seatNumber: 2,
     };
 
-    await Promise.all([
-      service.requestReservation({
-        userId: 1,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 2,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 3,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 4,
-        requestReservationDto: requestReservationDto,
-      }),
-    ]);
+    await expect(async () => {
+      await Promise.all([
+        service.requestReservation({
+          userId: 1,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 2,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 3,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 4,
+          requestReservationDto: requestReservationDto,
+        }),
+      ]);
+    }).rejects.toThrow(new NotFoundException('NotMatchSeatExists'));
 
-    const res = await em.find(ReservationEntity);
-    expect(res.length).toEqual(0);
+    const res = JSON.parse(
+      await rc.reservation.get(
+        `reservation:${requestReservationDto.date}:${requestReservationDto.seatNumber}`,
+      ),
+    );
+
+    expect(res).toEqual(null);
   });
 
   it('Should not reserved when seat is already used', async () => {
     await em.save(SeatEntity, {
       seatNumber: 3,
-      isAvailable: false,
-      dateAvailability: dateResult,
+      userId: 1111,
+      date,
     });
+
+    await rc.reservation.set(
+      `reservation:${date}:3`,
+      JSON.stringify({
+        userId: 1111,
+        seatNumber: 3,
+        date,
+      }),
+    );
 
     const requestReservationDto = {
       date,
       seatNumber: 3,
     };
 
-    await Promise.all([
-      service.requestReservation({
-        userId: 1,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 2,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 3,
-        requestReservationDto: requestReservationDto,
-      }),
-      service.requestReservation({
-        userId: 4,
-        requestReservationDto: requestReservationDto,
-      }),
-    ]);
+    await expect(async () => {
+      await Promise.all([
+        service.requestReservation({
+          userId: 1,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 2,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 3,
+          requestReservationDto: requestReservationDto,
+        }),
+        service.requestReservation({
+          userId: 4,
+          requestReservationDto: requestReservationDto,
+        }),
+      ]);
+    }).rejects.toThrow(new NotAcceptableException('Seat is already taken'));
 
-    const res = await em.find(ReservationEntity);
-    expect(res.length).toEqual(0);
+    const res = JSON.parse(await rc.reservation.get(`reservation:${date}:3`));
+
+    expect([1, 2, 3, 4].includes(res.userId)).toBeFalsy();
   });
 });

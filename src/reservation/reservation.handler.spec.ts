@@ -4,11 +4,33 @@ import { ReservationEntity } from './struct/reservation.entity';
 import { ReservationManager, ReservationReader } from './reservation.handler';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
+import { RedisClientService } from '../common/redis/redis.client-service';
+import { ChainableCommander } from 'ioredis';
+import { createMock } from '@golevelup/ts-jest';
+
+const fakeReservation = {
+  userId: 1,
+  date: '2024-01-01',
+  seatNumber: 1,
+};
+
+const mockRedis = {
+  set: (
+    // _key: string,
+    // _value: unknown,
+    // _expireFlag: 'EX',
+    // _expireSeconds: number,
+    // _transactionFlag: 'NX',
+    ..._args: any[]
+  ) => ({ exec: jest.fn() }),
+  get: () => fakeReservation,
+};
 
 describe('ReservationManager and ReservationReader', () => {
   let reservationManager: ReservationManager;
   let reservationReader: ReservationReader;
   let reservationRepository: Repository<ReservationEntity>;
+  let redisClient: RedisClientService;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -19,34 +41,18 @@ describe('ReservationManager and ReservationReader', () => {
           provide: getRepositoryToken(ReservationEntity),
           useClass: Repository,
         },
+        RedisClientService,
       ],
-    }).compile();
+    })
+      .useMocker(createMock)
+      .compile();
 
     reservationManager = moduleRef.get<ReservationManager>(ReservationManager);
     reservationReader = moduleRef.get<ReservationReader>(ReservationReader);
     reservationRepository = moduleRef.get<Repository<ReservationEntity>>(
       getRepositoryToken(ReservationEntity),
     );
-  });
-
-  const fakeReservation = {
-    id: 1,
-    userId: 1,
-    date: '2024-01-01',
-    seatNumber: 1,
-    isExpired: false,
-    paymentStatus: PAYMENT_STATUS.UNPAID,
-  };
-
-  it('should create a reservation', () => {
-    const createSpy = jest
-      .spyOn(reservationRepository, 'create')
-      .mockReturnValue(fakeReservation as ReservationEntity);
-
-    const result = reservationManager.create(fakeReservation);
-
-    expect(createSpy).toHaveBeenCalledWith(fakeReservation);
-    expect(result).toEqual(fakeReservation);
+    redisClient = moduleRef.get<RedisClientService>(RedisClientService);
   });
 
   it('should save a reservation', async () => {
@@ -55,28 +61,30 @@ describe('ReservationManager and ReservationReader', () => {
       paymentStatus: PAYMENT_STATUS.PAID,
     };
 
+    jest
+      .spyOn(redisClient.reservation, 'get')
+      .mockResolvedValueOnce(JSON.stringify(fakeReservation));
+
     const saveSpy = jest
-      .spyOn(reservationRepository, 'save')
-      .mockResolvedValue(updatedReservation as ReservationEntity);
+      .spyOn(redisClient.reservation, 'multi')
+      .mockReturnValueOnce(mockRedis as unknown as ChainableCommander);
 
     const result = await reservationManager.save(updatedReservation);
 
-    expect(saveSpy).toHaveBeenCalledWith(updatedReservation);
+    expect(saveSpy).toHaveBeenCalled();
     expect(result).toEqual(updatedReservation);
   });
 
   it('should find a reservation', async () => {
-    const partialReservation = { id: 1 };
-
     const findSpy = jest
-      .spyOn(reservationRepository, 'findOne')
-      .mockResolvedValue(fakeReservation as ReservationEntity);
+      .spyOn(redisClient.reservation, 'get')
+      .mockResolvedValueOnce(JSON.stringify(fakeReservation));
 
-    const result = await reservationReader.findOne(partialReservation);
+    const result = await reservationReader.findOne(fakeReservation);
 
-    expect(findSpy).toHaveBeenCalledWith({
-      where: partialReservation,
-    });
+    expect(findSpy).toHaveBeenCalledWith(
+      `reservation:${fakeReservation.date}:${fakeReservation.userId}`,
+    );
     expect(result).toEqual(fakeReservation);
   });
 });

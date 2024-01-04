@@ -59,7 +59,6 @@ describe('AuthService', () => {
       expect(result).toEqual({
         id: 1,
         email: 'test@example.com',
-        password: 'mockedHash',
         balance: 0,
       });
 

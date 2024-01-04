@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentManager } from './payment.handler';
-import { PaymentEntity } from './payment.entity';
+import { PaymentEntity } from './struct/payment.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { PAYMENT_STATUS } from 'src/common/types/reservation';
+import { createMock } from '@golevelup/ts-jest';
 
 describe('PaymentManager', () => {
   let paymentManager: PaymentManager;
@@ -18,7 +19,9 @@ describe('PaymentManager', () => {
           useClass: Repository,
         },
       ],
-    }).compile();
+    })
+      .useMocker(createMock)
+      .compile();
 
     paymentManager = module.get<PaymentManager>(PaymentManager);
     paymentRepository = module.get<Repository<PaymentEntity>>(
@@ -31,7 +34,6 @@ describe('PaymentManager', () => {
     amount: 10000,
     paymentDate: '2024-01-01',
     status: PAYMENT_STATUS.UNPAID,
-    reservationId: 1,
   };
 
   it('should create a payment', async () => {
@@ -39,7 +41,7 @@ describe('PaymentManager', () => {
       .spyOn(paymentRepository, 'create')
       .mockReturnValue(mockPayment as PaymentEntity);
 
-    const result = await paymentManager.create(mockPayment as PaymentEntity);
+    const result = paymentManager.create(mockPayment as PaymentEntity);
 
     expect(createSpy).toHaveBeenCalledWith(mockPayment);
     expect(result).toEqual(mockPayment);

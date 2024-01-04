@@ -26,7 +26,7 @@ describe('DateReader', () => {
   });
 
   it('should return available dates', async () => {
-    const mockDates: Partial<DateEntity>[] = [{ id: 1, date: '2024-01-01' }];
+    const mockDates: Partial<DateEntity>[] = [{ date: '2024-01-01' }];
 
     const findSpy = jest
       .spyOn(dateRepository, 'find')
@@ -38,7 +38,7 @@ describe('DateReader', () => {
       relations: ['seatAvailability'],
       where: {
         seatAvailability: {
-          isAvailable: true,
+          userId: null,
         },
       },
       order: {
