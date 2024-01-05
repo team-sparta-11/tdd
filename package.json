@@ -23,6 +23,7 @@
     "seed:run": "ts-node ./node_modules/typeorm-extension/bin/cli.cjs seed:run -d src/common/config/seed.config.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.485.0",
     "@liaoliaots/nestjs-redis": "^9.0.5",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.1.1",
@@ -33,6 +34,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^4.0.0",
     "@nestjs/swagger": "^7.1.16",
+    "@nestjs/terminus": "^10.2.0",
     "@nestjs/typeorm": "^10.0.1",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
@@ -40,6 +42,7 @@
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "ioredis": "^5.3.2",
+    "moment-timezone": "^0.5.44",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.3",
@@ -47,7 +50,8 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.17",
     "typeorm-extension": "^3.2.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.4.0",
