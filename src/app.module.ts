@@ -15,6 +15,7 @@ import { InTaskGuard } from './common/guard/InTask.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DateModule } from './date/date.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ReservationModule,
     WaitingModule,
     DateModule,
+    HealthModule,
   ],
   providers: [
     AppService,
