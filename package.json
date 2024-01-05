@@ -34,12 +34,15 @@
     "@nestjs/schedule": "^4.0.0",
     "@nestjs/swagger": "^7.1.16",
     "@nestjs/typeorm": "^10.0.1",
+    "@sentry/node": "^7.92.0",
+    "@slack/webhook": "^7.0.2",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.3.1",
     "ioredis": "^5.3.2",
+    "nest-winston": "^1.9.4",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.11.3",
@@ -47,7 +50,11 @@
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.17",
     "typeorm-extension": "^3.2.0",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "winston-slack-webhook-transport": "^2.3.3",
+    "winston-transport-sentry-node": "^2.7.0"
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.4.0",
