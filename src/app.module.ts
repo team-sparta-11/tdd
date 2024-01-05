@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { configModuleOption } from './common/config/app.config';
@@ -15,6 +15,8 @@ import { InTaskGuard } from './common/guard/InTask.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DateModule } from './date/date.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LoggingMiddleware } from './common/middleware/logging.middleware';
+import { winstonLogger } from './common/config/log.config';
 
 @Module({
   imports: [
@@ -39,4 +41,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoggingMiddleware).forRoutes('*');
+  }
+}
