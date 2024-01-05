@@ -19,22 +19,12 @@ export class HealthController {
   @Get()
   @HealthCheck()
   async check() {
-    try {
-      const result = await this.health.check([]);
-
-      this.logger.info(JSON.stringify(result));
-
-      return result;
-    } catch (error) {
-      console.error(error);
-      this.logger.error(error);
-    }
+    return this.health.check([]);
   }
 
   @Get('/db')
   @HealthCheck()
   dbcheck() {
-    this.logger.info('db health checked');
     return this.db.pingCheck('database');
   }
 }
