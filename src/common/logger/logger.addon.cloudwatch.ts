@@ -2,6 +2,7 @@ import {
   CloudWatchLogsClient,
   PutLogEventsCommand,
 } from '@aws-sdk/client-cloudwatch-logs';
+import { ConfigService } from '@nestjs/config';
 
 type CloudwatchConfig = {
   groupName: string;
@@ -22,17 +23,18 @@ export class CloudwatchLoggerAddon {
   private cloudwatchConfig: CloudwatchConfig;
 
   constructor() {
+    const config = new ConfigService();
     this.cloudWatchClient = new CloudWatchLogsClient({
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: config.get<string>('AWS_ACCESS_KEY'),
+        secretAccessKey: config.get<string>('AWS_SECRET_ACCESS_KEY'),
       },
-      region: process.env.CLOUDWATCH_REGION,
+      region: config.get<string>('CLOUDWATCH_REGION'),
     });
     this.cloudwatchConfig = {
-      groupName: process.env.CLOUDWATCH_GROUP,
-      stream_info: process.env.CLOUDWATCH_STREAM_INFO,
-      stream_error: process.env.CLOUDWATCH_STREAM_ERROR,
+      groupName: config.get<string>('CLOUDWATCH_GROUP'),
+      stream_info: config.get<string>('CLOUDWATCH_STREAM_INFO'),
+      stream_error: config.get<string>('CLOUDWATCH_STREAM_ERROR'),
     };
   }
 
