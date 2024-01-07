@@ -7,4 +7,4 @@ RUN npm install -g pnpm
 RUN pnpm install
 RUN pnpm build
 EXPOSE 3586
-CMD ["pnpm", "start"]
+CMD ["npm", "run", "start:prod"]
