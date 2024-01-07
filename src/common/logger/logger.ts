@@ -2,11 +2,12 @@ import * as winston from 'winston';
 import * as process from 'process';
 import * as moment from 'moment-timezone';
 import { CloudwatchLoggerAddon } from './logger.addon.cloudwatch';
+import { LogLevel, LoggerService } from '@nestjs/common';
 
 const { createLogger, transports } = winston;
 const { combine, timestamp, colorize, printf } = winston.format;
 
-export default class Logger {
+export default class Logger implements LoggerService {
   private logger: winston.Logger;
   private cloudwatchAddon: CloudwatchLoggerAddon;
   private is_production = process.env.NODE_ENV === 'development';
@@ -50,6 +51,19 @@ export default class Logger {
         }),
       );
     }
+  }
+
+  log(message: any, ..._optionalParams: any[]) {
+    this.info(message);
+  }
+  verbose?(message: any, ..._optionalParams: any[]) {
+    this.debug(message);
+  }
+  fatal?(message: any, ..._optionalParams: any[]) {
+    this.error(message);
+  }
+  setLogLevels?(_levels: LogLevel[]) {
+    throw new Error('Method not implemented.');
   }
 
   public debug(debugMsg: string, metadata = '') {
