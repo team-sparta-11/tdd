@@ -80,7 +80,7 @@ jobs:
           echo "MAX_TASKS=${{ vars.MAX_TASKS }}" >> .env.production
           echo "TASK_EXPIRED_SECONDS=${{ vars.TASK_EXPIRED_SECONDS }}" >> .env.production
           echo "TURN_OFF_WAITING_GUARD=${{ vars.TURN_OFF_WAITING_GUARD }}" >> .env.production
-          echo "SWAGGER_ADDRESS=${{ vars.SWAGGER_ADDRESS }}" >> .env.production
+          echo "DNS_ADDRESS=${{ vars.DNS_ADDRESS }}" >> .env.production
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
