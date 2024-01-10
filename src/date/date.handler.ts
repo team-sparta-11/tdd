@@ -14,17 +14,12 @@ export class DateReader implements Query {
   ) {}
 
   async getAvailableDates(): Promise<string[]> {
-    const dates = await this.dateRepository.find({
-      relations: ['seatAvailability'],
-      where: {
-        seatAvailability: {
-          userId: null,
-        },
-      },
-      order: {
-        date: 'ASC',
-      },
-    });
+    const dates = await this.dateRepository
+      .createQueryBuilder('date')
+      .leftJoinAndSelect('date.seatAvailability', 'seatAvailability')
+      .where('seatAvailability.userId IS NULL')
+      .orderBy('date.date', 'ASC')
+      .getMany();
 
     return dates.map((date) => date.date);
   }
