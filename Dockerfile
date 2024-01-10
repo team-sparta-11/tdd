@@ -5,7 +5,8 @@ COPY package*.json .
 RUN npm install -g pnpm
 RUN pnpm install
 COPY . .
-RUN npm run build
 ENV NODE_ENV production
+RUN npm run build
+# RUN npm run seed:run // TODO in real deployment
 EXPOSE 3000
 CMD ["npm", "run", "start:prod"]
