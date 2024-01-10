@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SeatReader, SeatManager } from './seat.handler';
-import { Repository } from 'typeorm';
+import { QueryBuilder, Repository } from 'typeorm';
 import { SeatEntity } from './struct/seat.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 
@@ -57,25 +57,31 @@ describe('SeatReader and SeatManager', () => {
     const mockDate = '2024-01-01';
     const mockAvailableSeats: Partial<SeatEntity>[] = [mockSeat];
 
+    const queries: any = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      andWhere: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValueOnce(mockAvailableSeats),
+    };
+
     const findSpy = jest
-      .spyOn(seatRepository, 'find')
-      .mockResolvedValue(mockAvailableSeats as SeatEntity[]);
+      .spyOn(seatRepository, 'createQueryBuilder')
+      .mockReturnValueOnce(queries);
 
     const result = await seatReader.getAvailableSeatByDate(mockDate);
 
-    expect(findSpy).toHaveBeenCalledWith({
-      relations: ['date'],
-      where: {
-        date: mockDate,
-        userId: null,
-      },
-      order: {
-        seatNumber: 'ASC',
-      },
-    });
-
     const expectedSeat = mockAvailableSeats.map((seat) => seat.seatNumber);
     expect(result).toEqual(expectedSeat as number[]);
+
+    expect(findSpy).toHaveBeenCalledWith('seat');
+    expect(queries.leftJoinAndSelect).toHaveBeenCalledWith('seat.date', 'date');
+    expect(queries.where).toHaveBeenCalledWith('seat.date = :date', {
+      date: mockDate,
+    });
+    expect(queries.andWhere).toHaveBeenCalledWith('seat.userId IS NULL');
+    expect(queries.orderBy).toHaveBeenCalledWith('seat.seatNumber', 'ASC');
+    expect(queries.getMany).toHaveBeenCalled();
   });
 
   it('should save a seat', async () => {
