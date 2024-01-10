@@ -6,5 +6,6 @@ RUN npm install -g pnpm
 RUN pnpm install
 COPY . .
 RUN npm run build
-EXPOSE 3001
+ENV NODE_ENV production
+EXPOSE 3000
 CMD ["npm", "run", "start:prod"]
