@@ -21,7 +21,7 @@ export default (app: INestApplication) => {
         name: 'status-token',
       })
       .addSecurityRequirements('status-token')
-      .addServer(`http://localhost:${process.env['APP_PORT']}`)
+      .addServer(`${process.env['SWAGGER_ADDRESS']}:${process.env['APP_PORT']}`)
       .build();
 
     const customOptions: SwaggerCustomOptions = {
