@@ -28,25 +28,31 @@ describe('DateReader', () => {
   it('should return available dates', async () => {
     const mockDates: Partial<DateEntity>[] = [{ date: '2024-01-01' }];
 
+    const queries: any = {
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      where: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValueOnce(mockDates),
+    };
+
     const findSpy = jest
-      .spyOn(dateRepository, 'find')
-      .mockResolvedValue(mockDates as DateEntity[]);
+      .spyOn(dateRepository, 'createQueryBuilder')
+      .mockReturnValueOnce(queries);
 
     const result = await dateReader.getAvailableDates();
 
-    expect(findSpy).toHaveBeenCalledWith({
-      relations: ['seatAvailability'],
-      where: {
-        seatAvailability: {
-          userId: null,
-        },
-      },
-      order: {
-        date: 'ASC',
-      },
-    });
-
     const expectedDates = mockDates.map((date) => date.date);
     expect(result).toEqual(expectedDates as string[]);
+
+    expect(findSpy).toHaveBeenCalledWith('date');
+    expect(queries.leftJoinAndSelect).toHaveBeenCalledWith(
+      'date.seatAvailability',
+      'seatAvailability',
+    );
+    expect(queries.where).toHaveBeenCalledWith(
+      'seatAvailability.userId IS NULL',
+    );
+    expect(queries.orderBy).toHaveBeenCalledWith('date.date', 'ASC');
+    expect(queries.getMany).toHaveBeenCalled();
   });
 });
