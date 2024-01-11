@@ -31,7 +31,7 @@ services:
     depends_on:
       - db
     ports:
-      - "${DOCKER_APP_PORT}:3000"
+      - '${DOCKER_APP_PORT}:3000'
     volumes:
       - ./:/app/
 

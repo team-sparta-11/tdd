@@ -121,6 +121,9 @@ devDependencies:
   '@types/jest':
     specifier: ^29.5.2
     version: 29.5.11
+  '@types/k6':
+    specifier: ^0.48.0
+    version: 0.48.0
   '@types/node':
     specifier: ^20.3.1
     version: 20.10.4
@@ -151,6 +154,9 @@ devDependencies:
   jest:
     specifier: ^29.5.0
     version: 29.7.0(@types/node@20.10.4)(ts-node@10.9.2)
+  k6:
+    specifier: ^0.0.0
+    version: 0.0.0
   prettier:
     specifier: ^3.0.0
     version: 3.1.0
@@ -2445,6 +2451,10 @@ packages:
     resolution: {integrity: sha512-VRLSGzik+Unrup6BsouBeHsf4d1hOEgYWTm/7Nmw1sXoN1+tRly/Gy/po3yeahnP4jfnQWWAhQAqcNfH7ngOkA==}
     dependencies:
       '@types/node': 20.10.4
+
+  /@types/k6@0.48.0:
+    resolution: {integrity: sha512-TobNNdz8XAr2xjg7sT0janwMpi54wKvBMklgVrrEl4X/Caw3WdFhzbF9yjTEr8TZmFad4ZDxechYeIuRowfhlA==}
+    dev: true
 
   /@types/luxon@3.3.7:
     resolution: {integrity: sha512-gKc9P2d4g5uYwmy4s/MO/yOVPmvHyvzka1YH6i5dM03UrFofHSmgc0D0ymbDRStFWHusk6cwwF6nhLm/ckBbbQ==}
@@ -5591,6 +5601,10 @@ packages:
       jwa: 1.4.1
       safe-buffer: 5.2.1
     dev: false
+
+  /k6@0.0.0:
+    resolution: {integrity: sha512-GAQSWayS2+LjbH5bkRi+pMPYyP1JSp7o+4j58ANZ762N/RH/SdlAT3CHHztnn8s/xgg8kYNM24Gd2IPo9b5W+g==}
+    dev: true
 
   /keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
