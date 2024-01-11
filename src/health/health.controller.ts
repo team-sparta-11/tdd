@@ -12,9 +12,7 @@ export class HealthController {
   constructor(
     private health: HealthCheckService,
     private db: TypeOrmHealthIndicator,
-  ) {
-    this.logger = new Logger('Health');
-  }
+  ) {}
 
   @Get()
   @HealthCheck()

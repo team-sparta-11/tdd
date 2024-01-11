@@ -30,7 +30,6 @@ export class ExceptionFilter implements NestExceptionFilter {
       response,
     };
 
-    console.log(log);
     this.logger.error(JSON.stringify(log, null, '  '));
     this.logger.error(exception.stack);
     res.status((exception as HttpException).getStatus()).json(response);
