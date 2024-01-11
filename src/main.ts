@@ -3,13 +3,10 @@ import { AppModule } from './app.module';
 import swaggerConfig from './common/config/swagger.config';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
-import Logger from './common/logger/logger';
 import { ExceptionFilter } from './common/filter/exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    logger: new Logger('common'),
-  });
+  const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api');
