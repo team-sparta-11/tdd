@@ -30,16 +30,13 @@ export class SeatReader implements Query<Seat> {
   }
 
   async getAvailableSeatByDate(date: string): Promise<number[]> {
-    const seats = await this.seatRepository.find({
-      relations: ['date'],
-      where: {
-        date: date,
-        userId: null,
-      },
-      order: {
-        seatNumber: 'ASC',
-      },
-    });
+    const seats = await this.seatRepository
+      .createQueryBuilder('seat')
+      .leftJoinAndSelect('seat.date', 'date')
+      .where('seat.date = :date', { date })
+      .andWhere('seat.userId IS NULL')
+      .orderBy('seat.seatNumber', 'ASC')
+      .getMany();
 
     return seats.map((seat) => seat.seatNumber);
   }
