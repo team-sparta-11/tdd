@@ -11,10 +11,12 @@ services:
       - POSTGRES_PASSWORD=1234
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8
 
-  memory:
-    image: redis
+  redis:
+    image: redis:7.2.2-alpine
     ports:
-      - '${DOCKER_REDIS_PORT}:6379'
+      - "${DOCKER_REDIS_PORT}:6379"
+    volumes:
+      - ./redis_data/data:/var/lib/redis/data
 
   app:
     build:

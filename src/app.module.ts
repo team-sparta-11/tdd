@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+  Module,
+  RequestMethod,
+  NestModule,
+  MiddlewareConsumer,
+} from '@nestjs/common';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { configModuleOption } from './common/config/app.config';
@@ -15,6 +20,8 @@ import { InTaskGuard } from './common/guard/InTask.guard';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DateModule } from './date/date.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { HealthModule } from './health/health.module';
+import { HttpLoggerMiddleware } from './middleware/http.logger.middleware';
 
 @Module({
   imports: [
@@ -30,6 +37,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ReservationModule,
     WaitingModule,
     DateModule,
+    HealthModule,
   ],
   providers: [
     AppService,
@@ -39,4 +47,12 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(HttpLoggerMiddleware)
+      .exclude('/')
+      .exclude('/health')
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}

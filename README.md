@@ -3,7 +3,7 @@
 ```
 git clone 
 pnpm i
-cp .env.example .env.develop
+cp .env.example .env.development
 or
 cp .env.example .env.prod
 
