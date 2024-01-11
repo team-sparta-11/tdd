@@ -4,10 +4,10 @@ import {
   ExceptionFilter as NestExceptionFilter,
   HttpException,
   InternalServerErrorException,
-  Logger,
   LoggerService,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import Logger from '../logger/logger';
 
 @Catch()
 export class ExceptionFilter implements NestExceptionFilter {
