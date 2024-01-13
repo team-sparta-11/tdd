@@ -71,6 +71,8 @@ jobs:
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env.production
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env.production
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.production
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env.production
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env.production
           echo "APP_PORT=${{ vars.APP_PORT }}" >> .env.production
           echo "CLOUDWATCH_GROUP=${{ vars.CLOUDWATCH_GROUP }}" >> .env.production
           echo "CLOUDWATCH_REGION=${{ vars.CLOUDWATCH_REGION }}" >> .env.production
