@@ -10,7 +10,7 @@ const { combine, timestamp, colorize, printf } = winston.format;
 export default class Logger implements LoggerService {
   private logger: winston.Logger;
   private cloudwatchAddon: CloudwatchLoggerAddon;
-  private is_production = process.env.NODE_ENV === 'development';
+  private is_production = process.env.NODE_ENV === 'production';
   protected now: string;
 
   constructor(private readonly subject: string) {
