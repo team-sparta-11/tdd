@@ -4,6 +4,7 @@ import swaggerConfig from './common/config/swagger.config';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { ExceptionFilter } from './common/filter/exception.filter';
+import { LoggerInterceptor } from './common/logger/logger.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,7 @@ async function bootstrap() {
   const appConfig = configService.get('appConfig');
 
   app.useGlobalFilters(new ExceptionFilter());
+  app.useGlobalInterceptors(new LoggerInterceptor());
 
   await app.listen(appConfig['port']);
 
