@@ -1,0 +1,25 @@
+config:
+  # This is a test server run by team Artillery
+  # It's designed to be highly scalable
+#  target: http://study.grayfield.net
+  target: http://localhost:3030
+  phases:
+    - duration: 10
+      arrivalRate: 1000
+      rampTo: 1000
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 2000
+
+scenarios:
+  - flow:
+      - loop:
+          - get:
+              url: "/health"
+        count: 10
