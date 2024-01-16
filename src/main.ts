@@ -17,7 +17,9 @@ async function bootstrap() {
   const appConfig = configService.get('appConfig');
 
   app.useGlobalFilters(new ExceptionFilter());
-  app.useGlobalInterceptors(new LoggerInterceptor());
+  app.useGlobalInterceptors(
+    new LoggerInterceptor({ excludes: ['/api/health', '/'] }),
+  );
 
   await app.listen(appConfig['port']);
 

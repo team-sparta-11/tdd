@@ -12,6 +12,8 @@ import Logger from './logger';
 export class LoggerInterceptor implements NestInterceptor {
   private logger = new Logger('HTTP');
 
+  constructor(private options?: { excludes?: string[] }) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const httpCtx = context.switchToHttp();
     const req = httpCtx.getRequest<Request>();
@@ -37,12 +39,7 @@ export class LoggerInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       tap((data) => {
-        if (
-          req.route.path === '/' ||
-          req.route.path === '/api/health' ||
-          req.route.path === '/health'
-        )
-          return;
+        if (this.options.excludes.includes(req.route.path)) return;
 
         const resLogs =
           `HttpResponse [status: ${res.statusCode}] [duration: ${
