@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy-ecr:
-    name: Deploy
+    name: Deploy to ECR
     runs-on: ubuntu-latest
     environment: production
 
@@ -67,8 +67,8 @@ jobs:
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deploy-ec2:
-    needs: build
-    name: CD
+    needs: deploy-ecr
+    name: Deploy to EC2
     runs-on: [self-hosted, concert-tdd-runner]
 
     steps:
