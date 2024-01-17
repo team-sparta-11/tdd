@@ -1,0 +1,90 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: ['beom/infra_refactor']
+
+env:
+  AWS_REGION: ap-northeast-2 # set this to your preferred AWS region, e.g. us-west-1
+  ECR_REPOSITORY: concert-tdd-repository # set this to your Amazon ECR repository name
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout V4
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Create .env.production file
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env.production
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env.production
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env.production
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env.production
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env.production
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> .env.production
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env.production
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.production
+          echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> .env.production
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env.production
+          echo "APP_PORT=${{ vars.APP_PORT }}" >> .env.production
+          echo "CLOUDWATCH_GROUP=${{ vars.CLOUDWATCH_GROUP }}" >> .env.production
+          echo "CLOUDWATCH_REGION=${{ vars.CLOUDWATCH_REGION }}" >> .env.production
+          echo "CLOUDWATCH_STREAM_ERROR=${{ vars.CLOUDWATCH_STREAM_ERROR }}" >> .env.production
+          echo "CLOUDWATCH_STREAM_INFO=${{ vars.CLOUDWATCH_STREAM_INFO }}" >> .env.production
+          echo "DB_SYNCHRONIZE=${{ vars.DB_SYNCHRONIZE }}" >> .env.production
+          echo "MAX_TASKS=${{ vars.MAX_TASKS }}" >> .env.production
+          echo "TASK_EXPIRED_SECONDS=${{ vars.TASK_EXPIRED_SECONDS }}" >> .env.production
+          echo "TURN_OFF_WAITING_GUARD=${{ vars.TURN_OFF_WAITING_GUARD }}" >> .env.production
+          echo "DNS_ADDRESS=${{ vars.DNS_ADDRESS }}" >> .env.production
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          
+  deploy:
+    needs: build
+    name: CD
+    runs-on: [self-hosted, concert-tdd-runner]
+    
+    steps:
+    - name: Configure AWS credentials 
+      uses: aws-actions/configure-aws-credentials@v1 
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+
+    - name: Login to Amazon ECR 
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Pull image from Amazon ECR and restart container
+      run: |
+        docker pull ${{ steps.build-image.outputs.image }}
+        docker stop concert-tdd && docker rm concert-tdd
+        docker run -d --name concert-tdd -p 80:3000 --restart unless-stopped ${{ steps.build-image.outputs.image }}
