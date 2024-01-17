@@ -64,8 +64,12 @@ jobs:
           # be deployed to ECS.
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+          # Output the image URL to the GitHub Actions environment
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+
+          # Set the image URL as an output for other jobs
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
   deploy-ec2:
     needs: deploy-ecr
     name: Deploy to EC2
@@ -85,6 +89,9 @@ jobs:
 
       - name: Pull image from Amazon ECR and restart container
         run: |
-          docker pull ${{ needs.deploy-ecr.steps.build-image.outputs.image }}
+          # Get the image URL from the deploy-ecr job's outputs
+          IMAGE_URL=${{ needs.deploy-ecr.outputs.image }}
+
+          docker pull $IMAGE_URL
           docker stop concert-tdd && docker rm concert-tdd
-          docker run -d --name concert-tdd -p 80:3000 --restart unless-stopped ${{ needs.deploy-ecr.steps.build-image.outputs.image }}
+          docker run -d --name concert-tdd -p 80:3000 --restart unless-stopped $IMAGE_URL
