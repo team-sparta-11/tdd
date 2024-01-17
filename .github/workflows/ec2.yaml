@@ -86,7 +86,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           # Get the image URL from the deploy-ecr job's outputs
-          IMAGE_URL=$ECR_REGISTRY/ECR_REPOSITORY:latest
+          IMAGE_URL=$ECR_REGISTRY/$ECR_REPOSITORY:latest
 
           docker pull $IMAGE_URL
           docker stop concert-tdd && docker rm concert-tdd
