@@ -14,7 +14,7 @@ permissions:
 jobs:
   deploy-ecr:
     name: Deploy to ECR
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, concert-tdd-runner]
     environment: production
 
     steps:
@@ -65,11 +65,20 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-          # Save the image URL to the GitHub Actions state file
-          echo "IMAGE_URL=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_STATE
+          # Output the image URL to the GitHub Actions environment
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
           # Set the image URL as an output for other jobs
-          echo "IMAGE_URL=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Pull image from Amazon ECR and restart container
+        run: |
+          # Get the image URL from the deploy-ecr job's outputs
+          IMAGE_URL=${{ needs.deploy-ecr.outputs.image }}
+
+          docker pull $IMAGE_URL
+          docker stop concert-tdd && docker rm concert-tdd
+          docker run -d --name concert-tdd -p 80:3000 --restart unless-stopped $IMAGE_URL
   deploy-ec2:
     needs: deploy-ecr
     name: Deploy to EC2
