@@ -14,7 +14,7 @@ permissions:
 jobs:
   deploy-ecr:
     name: Deploy to ECR
-    runs-on: [self-hosted, concert-tdd-runner]
+    runs-on: ubuntu-latest
     environment: production
 
     steps:
